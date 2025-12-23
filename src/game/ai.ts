@@ -164,8 +164,12 @@ export class ScytheAI {
         // Movement towards factory or unexplored territories
         if (action.destination) {
           const factory = gameState.board.factory;
-          const distanceToFactory = Math.abs(action.destination.x - factory.x) + 
-                                   Math.abs(action.destination.y - factory.y);
+          // Use hexagonal distance (cube distance)
+          const distanceToFactory = Math.max(
+            Math.abs(action.destination.x - factory.x),
+            Math.abs(action.destination.y - factory.y),
+            Math.abs((-action.destination.x - action.destination.y) - (-factory.x - factory.y))
+          );
           score += Math.max(0, 10 - distanceToFactory);
         }
         break;
@@ -195,23 +199,31 @@ export class ScytheAI {
   }
 
   /**
-   * Get adjacent positions on the board
+   * Get adjacent positions on a hexagonal board using axial coordinates
    */
   getAdjacentPositions(position: Position): Position[] {
     const positions: Position[] = [];
+    // Hexagonal grid has 6 neighbors in axial coordinates
     const directions = [
-      { x: 0, y: 1 },
-      { x: 0, y: -1 },
-      { x: 1, y: 0 },
-      { x: -1, y: 0 }
+      { x: 1, y: 0 },   // East
+      { x: 1, y: -1 },  // Northeast
+      { x: 0, y: -1 },  // Northwest
+      { x: -1, y: 0 },  // West
+      { x: -1, y: 1 },  // Southwest
+      { x: 0, y: 1 }    // Southeast
     ];
 
     directions.forEach(dir => {
       const newPos: Position = {
-        x: Math.max(0, Math.min(8, position.x + dir.x)),
-        y: Math.max(0, Math.min(8, position.y + dir.y))
+        x: position.x + dir.x,
+        y: position.y + dir.y
       };
-      positions.push(newPos);
+      
+      // Check if position is within hexagonal board bounds (radius 4)
+      const distance = Math.max(Math.abs(newPos.x), Math.abs(newPos.y), Math.abs(-newPos.x - newPos.y));
+      if (distance <= 4) {
+        positions.push(newPos);
+      }
     });
 
     return positions;

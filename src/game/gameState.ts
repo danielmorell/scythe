@@ -138,37 +138,45 @@ function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
 }
 
 function createBoard(): Board {
-  // Simplified board representation
+  // Hexagonal board representation
   return {
     territories: generateTerritories(),
-    factory: { x: 4, y: 4 }
+    factory: { x: 0, y: 0 }  // Center of hexagonal grid
   };
 }
 
 function generateTerritories(): Territory[] {
   const territories: Territory[] = [];
-  for (let x = 0; x < 9; x++) {
-    for (let y = 0; y < 9; y++) {
+  // Generate hexagonal grid using axial coordinates
+  // Create a hexagonal board with radius 4 (center at 0,0)
+  const radius = 4;
+  
+  for (let q = -radius; q <= radius; q++) {
+    const r1 = Math.max(-radius, -q - radius);
+    const r2 = Math.min(radius, -q + radius);
+    for (let r = r1; r <= r2; r++) {
       territories.push({
-        x,
-        y,
-        type: getTerritoryType(x, y),
+        x: q,
+        y: r,
+        type: getTerritoryType(q, r),
         resources: [],
         controlled: null
       });
     }
   }
+  
   return territories;
 }
 
-function getTerritoryType(x: number, y: number): TerritoryType {
+function getTerritoryType(q: number, r: number): TerritoryType {
   // Factory at center
-  if (x === 4 && y === 4) return 'factory';
+  if (q === 0 && r === 0) return 'factory';
   
-  // Random terrain types
-  const rand = (x * 7 + y * 11) % 5;
+  // Random terrain types based on axial coordinates
+  const hash = (q * 7 + r * 11) % 5;
+  const absHash = Math.abs(hash);
   const types: TerritoryType[] = ['forest', 'mountain', 'village', 'tundra', 'farm'];
-  return types[rand]!;
+  return types[absHash]!;
 }
 
 export function applyAction(gameState: GameState, player: PlayerType, action: GameAction): GameState {

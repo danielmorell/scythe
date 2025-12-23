@@ -7,12 +7,6 @@ type GameBoardProps = {
   aiPosition: Position;
 };
 
-type DisplayTerritory = {
-  x: number;
-  y: number;
-  type: TerritoryType;
-};
-
 export default function GameBoard({ board, playerPosition, aiPosition }: GameBoardProps) {
   const getTerritoryIcon = (type: TerritoryType): string => {
     switch (type) {
@@ -26,43 +20,51 @@ export default function GameBoard({ board, playerPosition, aiPosition }: GameBoa
     }
   };
 
-  const getTerritoryClass = (x: number, y: number): string => {
-    if (x === 4 && y === 4) return 'factory';
-    if (playerPosition.x === x && playerPosition.y === y) return 'player-position';
-    if (aiPosition.x === x && aiPosition.y === y) return 'ai-position';
+  const getTerritoryClass = (q: number, r: number): string => {
+    if (q === 0 && r === 0) return 'factory';
+    if (playerPosition.x === q && playerPosition.y === r) return 'player-position';
+    if (aiPosition.x === q && aiPosition.y === r) return 'ai-position';
     return '';
   };
 
-  // Create a simplified 9x9 grid view
-  const gridSize = 9;
-  const territories: DisplayTerritory[] = [];
-  
-  for (let y = 0; y < gridSize; y++) {
-    for (let x = 0; x < gridSize; x++) {
-      const territory = board.territories.find(t => t.x === x && t.y === y);
-      territories.push(territory || { x, y, type: 'tundra' as TerritoryType });
-    }
-  }
+  // Convert axial coordinates to pixel position for rendering hexagons
+  const hexToPixel = (q: number, r: number): { left: number; top: number } => {
+    const size = 50; // hex size
+    const x = size * (Math.sqrt(3) * q + Math.sqrt(3)/2 * r);
+    const y = size * (3/2 * r);
+    return { 
+      left: x + 300, // Center offset
+      top: y + 250   // Center offset
+    };
+  };
 
   return (
     <div className="game-board">
       <h3>Game Board</h3>
-      <div className="board-grid">
-        {territories.map((territory, idx) => (
-          <div
-            key={idx}
-            className={`territory ${getTerritoryClass(territory.x, territory.y)}`}
-            title={`${territory.type} (${territory.x}, ${territory.y})`}
-          >
-            <div className="territory-icon">{getTerritoryIcon(territory.type)}</div>
-            {playerPosition.x === territory.x && playerPosition.y === territory.y && (
-              <div className="unit-marker player-marker">👤</div>
-            )}
-            {aiPosition.x === territory.x && aiPosition.y === territory.y && (
-              <div className="unit-marker ai-marker">🤖</div>
-            )}
-          </div>
-        ))}
+      <div className="hexagonal-board">
+        {board.territories.map((territory, idx) => {
+          const pos = hexToPixel(territory.x, territory.y);
+          return (
+            <div
+              key={idx}
+              className={`hex-territory ${getTerritoryClass(territory.x, territory.y)}`}
+              style={{ left: `${pos.left}px`, top: `${pos.top}px` }}
+              title={`${territory.type} (${territory.x}, ${territory.y})`}
+            >
+              <div className="hexagon">
+                <div className="hex-content">
+                  <div className="territory-icon">{getTerritoryIcon(territory.type)}</div>
+                  {playerPosition.x === territory.x && playerPosition.y === territory.y && (
+                    <div className="unit-marker player-marker">👤</div>
+                  )}
+                  {aiPosition.x === territory.x && aiPosition.y === territory.y && (
+                    <div className="unit-marker ai-marker">🤖</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <div className="board-legend">
         <div className="legend-item">
