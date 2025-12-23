@@ -38,6 +38,41 @@ export const ACTIONS = {
   DEPLOY: 'deploy'
 } as const;
 
+// Player mat action columns - each column has top and bottom actions
+export type PlayerMatColumn = {
+  topAction: ActionType;
+  bottomAction: ActionType;
+};
+
+export const PLAYER_MAT_CONFIGURATIONS = {
+  INDUSTRIAL: [
+    { topAction: ACTIONS.MOVE as ActionType, bottomAction: ACTIONS.UPGRADE as ActionType },
+    { topAction: ACTIONS.PRODUCE as ActionType, bottomAction: ACTIONS.DEPLOY as ActionType },
+    { topAction: ACTIONS.BOLSTER as ActionType, bottomAction: ACTIONS.BUILD as ActionType },
+    { topAction: ACTIONS.TRADE as ActionType, bottomAction: ACTIONS.ENLIST as ActionType }
+  ],
+  ENGINEERING: [
+    { topAction: ACTIONS.MOVE as ActionType, bottomAction: ACTIONS.DEPLOY as ActionType },
+    { topAction: ACTIONS.TRADE as ActionType, bottomAction: ACTIONS.UPGRADE as ActionType },
+    { topAction: ACTIONS.BOLSTER as ActionType, bottomAction: ACTIONS.ENLIST as ActionType },
+    { topAction: ACTIONS.PRODUCE as ActionType, bottomAction: ACTIONS.BUILD as ActionType }
+  ],
+  PATRIOTIC: [
+    { topAction: ACTIONS.MOVE as ActionType, bottomAction: ACTIONS.BUILD as ActionType },
+    { topAction: ACTIONS.BOLSTER as ActionType, bottomAction: ACTIONS.UPGRADE as ActionType },
+    { topAction: ACTIONS.PRODUCE as ActionType, bottomAction: ACTIONS.ENLIST as ActionType },
+    { topAction: ACTIONS.TRADE as ActionType, bottomAction: ACTIONS.DEPLOY as ActionType }
+  ],
+  INNOVATIVE: [
+    { topAction: ACTIONS.MOVE as ActionType, bottomAction: ACTIONS.ENLIST as ActionType },
+    { topAction: ACTIONS.TRADE as ActionType, bottomAction: ACTIONS.BUILD as ActionType },
+    { topAction: ACTIONS.PRODUCE as ActionType, bottomAction: ACTIONS.UPGRADE as ActionType },
+    { topAction: ACTIONS.BOLSTER as ActionType, bottomAction: ACTIONS.DEPLOY as ActionType }
+  ]
+} as const;
+
+export type PlayerMatType = keyof typeof PLAYER_MAT_CONFIGURATIONS;
+
 export type Faction = typeof FACTIONS[keyof typeof FACTIONS];
 export type ResourceType = typeof RESOURCES[keyof typeof RESOURCES];
 export type ActionType = typeof ACTIONS[keyof typeof ACTIONS];
@@ -72,6 +107,8 @@ export type PlayerState = {
   buildings: Building[];
   completedObjectives: string[];
   abilities: FactionAbilities;
+  playerMat: PlayerMatType;
+  lastActionColumn: number | null;  // Track last action column used (cannot repeat)
 };
 
 export type Building = {
@@ -155,6 +192,9 @@ function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
       abilities = { riverwalk: false, lakes: false };
   }
 
+  // Assign player mats - player gets Industrial, AI gets Engineering
+  const playerMat: PlayerMatType = type === 'player' ? 'INDUSTRIAL' : 'ENGINEERING';
+
   return {
     faction,
     type,
@@ -176,7 +216,9 @@ function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
     position: { x: 0, y: 0 },
     buildings: [],
     completedObjectives: [],
-    abilities
+    abilities,
+    playerMat,
+    lastActionColumn: null
   };
 }
 
@@ -252,23 +294,44 @@ function getTerritoryType(q: number, r: number): TerritoryType {
   return types[absHash]!;
 }
 
-export function applyAction(gameState: GameState, player: PlayerType, action: GameAction): GameState {
+export function applyAction(gameState: GameState, player: PlayerType, action: GameAction, columnIndex?: number): GameState {
   const newState = JSON.parse(JSON.stringify(gameState)) as GameState;
+  const playerState = newState[player];
   
+  // Apply top row action
   switch (action.type) {
     case ACTIONS.PRODUCE:
-      return handleProduce(newState, player);
+      handleProduce(newState, player);
+      break;
     case ACTIONS.TRADE:
-      return handleTrade(newState, player);
+      handleTrade(newState, player);
+      break;
     case ACTIONS.BOLSTER:
-      return handleBolster(newState, player);
+      handleBolster(newState, player);
+      break;
     case ACTIONS.MOVE:
-      return handleMove(newState, player, action);
+      handleMove(newState, player, action);
+      break;
     case ACTIONS.BUILD:
-      return handleBuild(newState, player, action);
-    default:
-      return newState;
+      handleBuild(newState, player, action);
+      break;
   }
+  
+  // If column index provided, execute bottom row action and track column usage
+  if (columnIndex !== undefined) {
+    const mat = PLAYER_MAT_CONFIGURATIONS[playerState.playerMat];
+    const column = mat[columnIndex];
+    
+    // Execute bottom row action if it matches the action type
+    if (column && column.topAction === action.type) {
+      executeBottomAction(newState, player, column.bottomAction);
+      
+      // Track last action column (can't use same column on next turn)
+      playerState.lastActionColumn = columnIndex;
+    }
+  }
+  
+  return newState;
 }
 
 function handleProduce(gameState: GameState, player: PlayerType): GameState {
@@ -396,6 +459,89 @@ export function calculateScore(playerState: PlayerState): number {
   score += playerState.buildings.length * 3;
   
   return score;
+}
+
+/**
+ * Get available action columns for a player
+ */
+export function getAvailableActionColumns(playerState: PlayerState): number[] {
+  const mat = PLAYER_MAT_CONFIGURATIONS[playerState.playerMat];
+  const availableColumns: number[] = [];
+  
+  // Can use any column except the one used last turn
+  for (let i = 0; i < mat.length; i++) {
+    if (playerState.lastActionColumn !== i) {
+      availableColumns.push(i);
+    }
+  }
+  
+  return availableColumns;
+}
+
+/**
+ * Execute bottom row action based on type
+ */
+function executeBottomAction(gameState: GameState, player: PlayerType, actionType: ActionType): void {
+  const playerState = gameState[player];
+  
+  switch (actionType) {
+    case ACTIONS.UPGRADE:
+      // Upgrade: Gain 1 coin reduction on future actions
+      playerState.resources[RESOURCES.COIN] += 1;
+      gameState.gameLog.push({
+        turn: gameState.currentTurn,
+        player,
+        action: 'Upgraded',
+        details: 'Infrastructure improved'
+      });
+      break;
+      
+    case ACTIONS.DEPLOY:
+      // Deploy: Add a mech
+      if (playerState.resources[RESOURCES.METAL] >= 4) {
+        playerState.resources[RESOURCES.METAL] -= 4;
+        playerState.units.mechs += 1;
+        gameState.gameLog.push({
+          turn: gameState.currentTurn,
+          player,
+          action: 'Deployed',
+          details: 'Mech deployed'
+        });
+      }
+      break;
+      
+    case ACTIONS.BUILD:
+      // Build: Construct building
+      if (playerState.resources[RESOURCES.WOOD] >= 3 && playerState.resources[RESOURCES.COIN] >= 2) {
+        playerState.resources[RESOURCES.WOOD] -= 3;
+        playerState.resources[RESOURCES.COIN] -= 2;
+        playerState.buildings.push({
+          type: 'structure',
+          position: playerState.position
+        });
+        gameState.gameLog.push({
+          turn: gameState.currentTurn,
+          player,
+          action: 'Built',
+          details: 'Structure erected'
+        });
+      }
+      break;
+      
+    case ACTIONS.ENLIST:
+      // Enlist: Add recruit (gain bonus)
+      if (playerState.resources[RESOURCES.FOOD] >= 3) {
+        playerState.resources[RESOURCES.FOOD] -= 3;
+        playerState.resources[RESOURCES.POPULARITY] += 2;
+        gameState.gameLog.push({
+          turn: gameState.currentTurn,
+          player,
+          action: 'Enlisted',
+          details: 'Recruit joined'
+        });
+      }
+      break;
+  }
 }
 
 /**

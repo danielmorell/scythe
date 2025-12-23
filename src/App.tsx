@@ -4,7 +4,8 @@ import PlayerDashboard from './components/PlayerDashboard'
 import ActionPanel from './components/ActionPanel'
 import GameBoard from './components/GameBoard'
 import GameLog from './components/GameLog'
-import { createInitialGameState, FACTIONS, ACTIONS, RESOURCES, applyAction, switchTurn, calculateScore, GameState, GameAction, ActionType } from './game/gameState'
+import PlayerMat from './components/PlayerMat'
+import { createInitialGameState, FACTIONS, ACTIONS, RESOURCES, applyAction, switchTurn, calculateScore, GameState, GameAction, ActionType, getAvailableActionColumns } from './game/gameState'
 import { ScytheAI, getActionRecommendations, Difficulty, ActionRecommendation } from './game/ai'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
   const [ai, setAI] = useState<ScytheAI | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
+  const [selectedColumn, setSelectedColumn] = useState<number | null>(null);
 
   // Calculate recommendations when needed
   const recommendations: ActionRecommendation[] = showRecommendations && gameState 
@@ -24,8 +26,11 @@ function App() {
       // AI takes its turn after a short delay
       const timer = setTimeout(() => {
         const aiAction = ai.chooseAction(gameState);
+        // AI chooses random available column
+        const availableColumns = getAvailableActionColumns(gameState.ai);
+        const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
         // Handle AI action inline to avoid dependency issues
-        const newState = applyAction(gameState, 'ai', aiAction);
+        const newState = applyAction(gameState, 'ai', aiAction, randomColumn);
         const nextState = switchTurn(newState);
         setGameState(nextState);
       }, 1000);
@@ -39,14 +44,20 @@ function App() {
     setAI(new ScytheAI(selectedDifficulty));
     setDifficulty(selectedDifficulty);
     setGameStarted(true);
+    setSelectedColumn(null);
   };
 
   const handlePlayerAction = (action: GameAction) => {
-    if (!gameState || gameState.currentPlayer !== 'player') return;
+    if (!gameState || gameState.currentPlayer !== 'player' || selectedColumn === null) return;
 
-    const newState = applyAction(gameState, 'player', action);
+    const newState = applyAction(gameState, 'player', action, selectedColumn);
     const nextState = switchTurn(newState);
     setGameState(nextState);
+    setSelectedColumn(null); // Reset selection for next turn
+  };
+  
+  const handleColumnSelect = (columnIndex: number) => {
+    setSelectedColumn(columnIndex);
   };
 
   const canAfford = (actionType: ActionType): boolean => {
@@ -196,12 +207,26 @@ function App() {
           />
           
           {gameState.currentPlayer === 'player' && (
-            <ActionPanel 
-              onAction={handlePlayerAction}
-              canAfford={canAfford}
-              recommendations={recommendations}
-              showRecommendations={showRecommendations}
-            />
+            <>
+              <PlayerMat 
+                playerState={gameState.player}
+                onSelectColumn={handleColumnSelect}
+                availableColumns={getAvailableActionColumns(gameState.player)}
+              />
+              {selectedColumn !== null && (
+                <ActionPanel 
+                  onAction={handlePlayerAction}
+                  canAfford={canAfford}
+                  recommendations={recommendations}
+                  showRecommendations={showRecommendations}
+                />
+              )}
+              {selectedColumn === null && (
+                <div className="select-column-prompt">
+                  ⬆️ Select an action column from your player mat to continue
+                </div>
+              )}
+            </>
           )}
           
           {gameState.currentPlayer === 'ai' && (
