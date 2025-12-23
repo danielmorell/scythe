@@ -1,23 +1,27 @@
 .game-board {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #4a3c2a 0%, #3a2f22 100%);
+  border-radius: 4px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   margin-bottom: 20px;
+  border: 2px solid #6b5642;
 }
 
 .game-board h3 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #d4a574;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .hexagonal-board {
   position: relative;
   width: 100%;
   height: 600px;
-  background: #f0f0f0;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #3a2f22 0%, #2c2416 100%);
+  border-radius: 4px;
   overflow: hidden;
+  border: 2px solid #6b5642;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .hex-territory {
@@ -38,10 +42,10 @@
   position: relative;
   width: 80px;
   height: 46px;
-  background-color: #e8f5e9;
+  background-color: #6b5a3a;
   margin: 23px 0;
-  border-left: 2px solid #ddd;
-  border-right: 2px solid #ddd;
+  border-left: 2px solid #4a3c2a;
+  border-right: 2px solid #4a3c2a;
 }
 
 .hexagon:before,
@@ -54,29 +58,29 @@
   transform: scaleY(0.5774) rotate(-45deg);
   background-color: inherit;
   left: 9.2157px;
-  border-left: 2px solid #ddd;
-  border-right: 2px solid #ddd;
+  border-left: 2px solid #4a3c2a;
+  border-right: 2px solid #4a3c2a;
 }
 
 .hexagon:before {
   top: -28.2843px;
-  border-top: 2px solid #ddd;
+  border-top: 2px solid #4a3c2a;
   border-bottom: none;
 }
 
 .hexagon:after {
   bottom: -28.2843px;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid #4a3c2a;
   border-top: none;
 }
 
 .hex-territory.factory .hexagon {
-  background-color: #ffe082;
+  background-color: #b8860b;
 }
 
 .hex-territory.factory .hexagon:before,
 .hex-territory.factory .hexagon:after {
-  border-color: #ffc107;
+  border-color: #704214;
 }
 
 .hex-content {
@@ -172,32 +176,32 @@
 }
 
 .hex-territory.player-position .hexagon {
-  background-color: #bbdefb;
+  background-color: #5a4a3a;
 }
 
 .hex-territory.player-position .hexagon:before,
 .hex-territory.player-position .hexagon:after {
-  border-color: #2196f3;
+  border-color: #8b7355;
   border-width: 3px;
 }
 
 .hex-territory.player-position .hexagon {
-  border-color: #2196f3;
+  border-color: #8b7355;
   border-width: 3px;
 }
 
 .hex-territory.ai-position .hexagon {
-  background-color: #ffcdd2;
+  background-color: #6b3410;
 }
 
 .hex-territory.ai-position .hexagon:before,
 .hex-territory.ai-position .hexagon:after {
-  border-color: #f44336;
+  border-color: #8b4513;
   border-width: 3px;
 }
 
 .hex-territory.ai-position .hexagon {
-  border-color: #f44336;
+  border-color: #8b4513;
   border-width: 3px;
 }
 
@@ -210,23 +214,23 @@
   top: -10px;
   right: -10px;
   font-size: 0.9rem;
-  background: white;
+  background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
   border-radius: 50%;
   width: 22px;
   height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   z-index: 3;
 }
 
 .player-marker {
-  border: 2px solid #2196f3;
+  border: 2px solid #8b7355;
 }
 
 .ai-marker {
-  border: 2px solid #f44336;
+  border: 2px solid #8b4513;
 }
 
 .board-legend {
@@ -235,7 +239,7 @@
   justify-content: center;
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #6b5642;
 }
 
 .legend-item {
@@ -243,7 +247,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: #666;
+  color: #c9b896;
 }
 
 .legend-icon {

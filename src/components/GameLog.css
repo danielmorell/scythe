@@ -1,16 +1,18 @@
 .game-log {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #4a3c2a 0%, #3a2f22 100%);
+  border-radius: 4px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   max-height: 500px;
   display: flex;
   flex-direction: column;
+  border: 2px solid #6b5642;
 }
 
 .game-log h3 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #d4a574;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .log-entries {
@@ -20,49 +22,50 @@
 
 .log-empty {
   text-align: center;
-  color: #999;
+  color: #8b7355;
   padding: 20px;
   font-style: italic;
 }
 
 .log-entry {
-  background: #f5f5f5;
-  border-left: 4px solid #667eea;
+  background: rgba(60, 48, 35, 0.6);
+  border-left: 4px solid #b8860b;
   border-radius: 4px;
   padding: 12px;
   margin-bottom: 10px;
   transition: all 0.2s ease;
+  border: 1px solid #6b5642;
 }
 
 .log-entry:hover {
-  background: #eeeeee;
+  background: rgba(70, 58, 45, 0.8);
   transform: translateX(4px);
 }
 
 .log-entry.ai {
-  border-left-color: #f5576c;
+  border-left-color: #8b4513;
 }
 
 .log-turn {
   font-size: 0.75rem;
-  color: #999;
+  color: #8b7355;
   margin-bottom: 4px;
 }
 
 .log-player {
   font-weight: bold;
-  color: #333;
+  color: #d4a574;
   margin-bottom: 4px;
 }
 
 .log-action {
-  color: #555;
+  color: #c9b896;
   font-size: 0.95rem;
   margin-bottom: 2px;
 }
 
 .log-details {
-  color: #777;
+  color: #a08968;
   font-size: 0.85rem;
   font-style: italic;
 }
@@ -73,15 +76,15 @@
 }
 
 .log-entries::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #3a2f22;
   border-radius: 4px;
 }
 
 .log-entries::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #6b5642;
   border-radius: 4px;
 }
 
 .log-entries::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #8b7355;
 }
