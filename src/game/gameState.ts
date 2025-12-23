@@ -6,7 +6,7 @@ export const FACTIONS = {
   SAXONY: 'Saxony Empire',
   POLANIA: 'Republic of Polania',
   RUSVIET: 'Rusviet Union'
-};
+} as const;
 
 export const RESOURCES = {
   COIN: 'coin',
@@ -16,7 +16,7 @@ export const RESOURCES = {
   FOOD: 'food',
   METAL: 'metal',
   OIL: 'oil'
-};
+} as const;
 
 export const ACTIONS = {
   MOVE: 'move',
@@ -27,9 +27,81 @@ export const ACTIONS = {
   ENLIST: 'enlist',
   UPGRADE: 'upgrade',
   DEPLOY: 'deploy'
+} as const;
+
+export type Faction = typeof FACTIONS[keyof typeof FACTIONS];
+export type ResourceType = typeof RESOURCES[keyof typeof RESOURCES];
+export type ActionType = typeof ACTIONS[keyof typeof ACTIONS];
+
+export type Position = {
+  x: number;
+  y: number;
 };
 
-export function createInitialGameState(playerFaction, aiFaction) {
+export type ResourceMap = {
+  [K in ResourceType]: number;
+};
+
+export type PlayerType = 'player' | 'ai';
+
+export type PlayerState = {
+  faction: Faction;
+  type: PlayerType;
+  resources: ResourceMap;
+  stars: number;
+  units: {
+    workers: number;
+    mechs: number;
+    character: number;
+  };
+  position: Position;
+  buildings: Building[];
+  completedObjectives: string[];
+};
+
+export type Building = {
+  type: string;
+  position: Position;
+};
+
+export type TerritoryType = 'factory' | 'forest' | 'mountain' | 'village' | 'tundra' | 'farm';
+
+export type Territory = {
+  x: number;
+  y: number;
+  type: TerritoryType;
+  resources: string[];
+  controlled: PlayerType | null;
+};
+
+export type Board = {
+  territories: Territory[];
+  factory: Position;
+};
+
+export type GameLogEntry = {
+  turn: number;
+  player: PlayerType;
+  action: string;
+  details?: string;
+};
+
+export type GameState = {
+  currentTurn: number;
+  currentPlayer: PlayerType;
+  player: PlayerState;
+  ai: PlayerState;
+  board: Board;
+  gameLog: GameLogEntry[];
+};
+
+export type GameAction = {
+  type: ActionType;
+  destination?: Position;
+  buildingType?: string;
+};
+
+export function createInitialGameState(playerFaction: Faction, aiFaction: Faction): GameState {
   return {
     currentTurn: 0,
     currentPlayer: 'player',
@@ -40,7 +112,7 @@ export function createInitialGameState(playerFaction, aiFaction) {
   };
 }
 
-function createPlayerState(faction, type) {
+function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
   return {
     faction,
     type,
@@ -65,7 +137,7 @@ function createPlayerState(faction, type) {
   };
 }
 
-function createBoard() {
+function createBoard(): Board {
   // Simplified board representation
   return {
     territories: generateTerritories(),
@@ -73,8 +145,8 @@ function createBoard() {
   };
 }
 
-function generateTerritories() {
-  const territories = [];
+function generateTerritories(): Territory[] {
+  const territories: Territory[] = [];
   for (let x = 0; x < 9; x++) {
     for (let y = 0; y < 9; y++) {
       territories.push({
@@ -89,18 +161,18 @@ function generateTerritories() {
   return territories;
 }
 
-function getTerritoryType(x, y) {
+function getTerritoryType(x: number, y: number): TerritoryType {
   // Factory at center
   if (x === 4 && y === 4) return 'factory';
   
   // Random terrain types
   const rand = (x * 7 + y * 11) % 5;
-  const types = ['forest', 'mountain', 'village', 'tundra', 'farm'];
-  return types[rand];
+  const types: TerritoryType[] = ['forest', 'mountain', 'village', 'tundra', 'farm'];
+  return types[rand]!;
 }
 
-export function applyAction(gameState, player, action) {
-  const newState = JSON.parse(JSON.stringify(gameState));
+export function applyAction(gameState: GameState, player: PlayerType, action: GameAction): GameState {
+  const newState = JSON.parse(JSON.stringify(gameState)) as GameState;
   
   switch (action.type) {
     case ACTIONS.PRODUCE:
@@ -118,7 +190,7 @@ export function applyAction(gameState, player, action) {
   }
 }
 
-function handleProduce(gameState, player) {
+function handleProduce(gameState: GameState, player: PlayerType): GameState {
   const playerState = gameState[player];
   
   // Simple produce action - gain resources
@@ -138,7 +210,7 @@ function handleProduce(gameState, player) {
   return gameState;
 }
 
-function handleTrade(gameState, player) {
+function handleTrade(gameState: GameState, player: PlayerType): GameState {
   const playerState = gameState[player];
   
   // Simple trade - convert resources to coins
@@ -157,7 +229,7 @@ function handleTrade(gameState, player) {
   return gameState;
 }
 
-function handleBolster(gameState, player) {
+function handleBolster(gameState: GameState, player: PlayerType): GameState {
   const playerState = gameState[player];
   
   // Gain power
@@ -177,43 +249,48 @@ function handleBolster(gameState, player) {
   return gameState;
 }
 
-function handleMove(gameState, player, action) {
+function handleMove(gameState: GameState, player: PlayerType, action: GameAction): GameState {
   const playerState = gameState[player];
   
   // Simple movement
-  playerState.position = action.destination;
-  
-  gameState.gameLog.push({
-    turn: gameState.currentTurn,
-    player,
-    action: 'Moved',
-    details: `to (${action.destination.x}, ${action.destination.y})`
-  });
-  
-  return gameState;
-}
-
-function handleBuild(gameState, player, action) {
-  const playerState = gameState[player];
-  
-  // Build structure
-  if (playerState.resources[RESOURCES.WOOD] >= 3 && playerState.resources[RESOURCES.COIN] >= 2) {
-    playerState.resources[RESOURCES.WOOD] -= 3;
-    playerState.resources[RESOURCES.COIN] -= 2;
-    playerState.buildings.push({ type: action.buildingType, position: playerState.position });
+  if (action.destination) {
+    playerState.position = action.destination;
     
     gameState.gameLog.push({
       turn: gameState.currentTurn,
       player,
-      action: 'Built',
-      details: action.buildingType
+      action: 'Moved',
+      details: `to (${action.destination.x}, ${action.destination.y})`
     });
   }
   
   return gameState;
 }
 
-export function switchTurn(gameState) {
+function handleBuild(gameState: GameState, player: PlayerType, action: GameAction): GameState {
+  const playerState = gameState[player];
+  
+  // Build structure
+  if (playerState.resources[RESOURCES.WOOD] >= 3 && playerState.resources[RESOURCES.COIN] >= 2) {
+    playerState.resources[RESOURCES.WOOD] -= 3;
+    playerState.resources[RESOURCES.COIN] -= 2;
+    
+    if (action.buildingType) {
+      playerState.buildings.push({ type: action.buildingType, position: playerState.position });
+      
+      gameState.gameLog.push({
+        turn: gameState.currentTurn,
+        player,
+        action: 'Built',
+        details: action.buildingType
+      });
+    }
+  }
+  
+  return gameState;
+}
+
+export function switchTurn(gameState: GameState): GameState {
   const newState = { ...gameState };
   newState.currentPlayer = newState.currentPlayer === 'player' ? 'ai' : 'player';
   if (newState.currentPlayer === 'player') {
@@ -222,7 +299,7 @@ export function switchTurn(gameState) {
   return newState;
 }
 
-export function calculateScore(playerState) {
+export function calculateScore(playerState: PlayerState): number {
   let score = 0;
   
   // Coins

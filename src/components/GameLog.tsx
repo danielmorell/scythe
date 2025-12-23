@@ -1,7 +1,11 @@
-import React from 'react';
 import './GameLog.css';
+import { GameLogEntry } from '../game/gameState';
 
-export default function GameLog({ gameLog }) {
+type GameLogProps = {
+  gameLog: GameLogEntry[];
+};
+
+export default function GameLog({ gameLog }: GameLogProps) {
   return (
     <div className="game-log">
       <h3>Game Log</h3>

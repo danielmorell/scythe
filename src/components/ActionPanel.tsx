@@ -1,9 +1,23 @@
-import React from 'react';
 import './ActionPanel.css';
-import { ACTIONS } from '../game/gameState';
+import { ACTIONS, GameAction, ActionType } from '../game/gameState';
+import { ActionRecommendation } from '../game/ai';
 
-export default function ActionPanel({ onAction, canAfford, recommendations, showRecommendations }) {
-  const actions = [
+type ActionPanelProps = {
+  onAction: (action: GameAction) => void;
+  canAfford: (actionType: ActionType) => boolean;
+  recommendations: ActionRecommendation[];
+  showRecommendations: boolean;
+};
+
+type ActionInfo = {
+  type: ActionType;
+  label: string;
+  description: string;
+  cost: string;
+};
+
+export default function ActionPanel({ onAction, canAfford, recommendations, showRecommendations }: ActionPanelProps) {
+  const actions: ActionInfo[] = [
     { 
       type: ACTIONS.PRODUCE, 
       label: '🏭 Produce', 

@@ -1,8 +1,20 @@
-import React from 'react';
 import './GameBoard.css';
+import { Board, Position, TerritoryType } from '../game/gameState';
 
-export default function GameBoard({ board, playerPosition, aiPosition }) {
-  const getTerritoryIcon = (type) => {
+type GameBoardProps = {
+  board: Board;
+  playerPosition: Position;
+  aiPosition: Position;
+};
+
+type DisplayTerritory = {
+  x: number;
+  y: number;
+  type: TerritoryType;
+};
+
+export default function GameBoard({ board, playerPosition, aiPosition }: GameBoardProps) {
+  const getTerritoryIcon = (type: TerritoryType): string => {
     switch (type) {
       case 'factory': return '🏭';
       case 'forest': return '🌲';
@@ -14,7 +26,7 @@ export default function GameBoard({ board, playerPosition, aiPosition }) {
     }
   };
 
-  const getTerritoryClass = (x, y) => {
+  const getTerritoryClass = (x: number, y: number): string => {
     if (x === 4 && y === 4) return 'factory';
     if (playerPosition.x === x && playerPosition.y === y) return 'player-position';
     if (aiPosition.x === x && aiPosition.y === y) return 'ai-position';
@@ -23,14 +35,12 @@ export default function GameBoard({ board, playerPosition, aiPosition }) {
 
   // Create a simplified 9x9 grid view
   const gridSize = 9;
-  const territories = [];
+  const territories: DisplayTerritory[] = [];
   
   for (let y = 0; y < gridSize; y++) {
     for (let x = 0; x < gridSize; x++) {
-      const territory = board.territories.find(t => t.x === x && t.y === y) || {
-        x, y, type: 'tundra'
-      };
-      territories.push(territory);
+      const territory = board.territories.find(t => t.x === x && t.y === y);
+      territories.push(territory || { x, y, type: 'tundra' as TerritoryType });
     }
   }
 

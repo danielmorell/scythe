@@ -1,9 +1,20 @@
 // Scythe AI Decision Making
 
-import { ACTIONS, RESOURCES, applyAction, calculateScore } from './gameState.js';
+import { ACTIONS, RESOURCES, applyAction, calculateScore, GameState, PlayerState, GameAction, Position, PlayerType } from './gameState';
+
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+export type ActionRecommendation = {
+  action: GameAction;
+  score: number;
+  description: string;
+};
 
 export class ScytheAI {
-  constructor(difficulty = 'medium') {
+  difficulty: Difficulty;
+  lookaheadDepth: number;
+
+  constructor(difficulty: Difficulty = 'medium') {
     this.difficulty = difficulty;
     this.lookaheadDepth = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3;
   }
@@ -11,7 +22,7 @@ export class ScytheAI {
   /**
    * Choose the best action for the AI
    */
-  chooseAction(gameState) {
+  chooseAction(gameState: GameState): GameAction {
     const aiState = gameState.ai;
     const possibleActions = this.generatePossibleActions(gameState, aiState);
     
@@ -31,17 +42,18 @@ export class ScytheAI {
 
     // Add some randomness for easier difficulties
     if (this.difficulty === 'easy' && Math.random() < 0.3) {
-      return evaluatedActions[Math.floor(Math.random() * Math.min(3, evaluatedActions.length))].action;
+      const randomIndex = Math.floor(Math.random() * Math.min(3, evaluatedActions.length));
+      return evaluatedActions[randomIndex]!.action;
     }
 
-    return evaluatedActions[0].action;
+    return evaluatedActions[0]!.action;
   }
 
   /**
    * Generate all possible actions for the AI
    */
-  generatePossibleActions(gameState, playerState) {
-    const actions = [];
+  generatePossibleActions(_gameState: GameState, playerState: PlayerState): GameAction[] {
+    const actions: GameAction[] = [];
 
     // Produce action
     if (playerState.resources[RESOURCES.COIN] >= 1) {
@@ -75,7 +87,7 @@ export class ScytheAI {
   /**
    * Evaluate an action's value
    */
-  evaluateAction(gameState, player, action) {
+  evaluateAction(gameState: GameState, player: PlayerType, action: GameAction): number {
     // Simulate the action
     const simulatedState = applyAction(gameState, player, action);
     const playerState = simulatedState[player];
@@ -97,7 +109,7 @@ export class ScytheAI {
   /**
    * Evaluate resource values
    */
-  evaluateResources(playerState) {
+  evaluateResources(playerState: PlayerState): number {
     let score = 0;
     
     // Value different resources
@@ -115,7 +127,7 @@ export class ScytheAI {
   /**
    * Evaluate strategic value of an action
    */
-  evaluateStrategicValue(gameState, player, action) {
+  evaluateStrategicValue(gameState: GameState, player: PlayerType, action: GameAction): number {
     let score = 0;
     const playerState = gameState[player];
 
@@ -150,10 +162,12 @@ export class ScytheAI {
       
       case ACTIONS.MOVE: {
         // Movement towards factory or unexplored territories
-        const factory = gameState.board.factory;
-        const distanceToFactory = Math.abs(action.destination.x - factory.x) + 
-                                 Math.abs(action.destination.y - factory.y);
-        score += Math.max(0, 10 - distanceToFactory);
+        if (action.destination) {
+          const factory = gameState.board.factory;
+          const distanceToFactory = Math.abs(action.destination.x - factory.x) + 
+                                   Math.abs(action.destination.y - factory.y);
+          score += Math.max(0, 10 - distanceToFactory);
+        }
         break;
       }
     }
@@ -164,7 +178,7 @@ export class ScytheAI {
   /**
    * Evaluate overall economy
    */
-  evaluateEconomy(playerState) {
+  evaluateEconomy(playerState: PlayerState): number {
     let score = 0;
 
     // Balanced resources are good
@@ -183,8 +197,8 @@ export class ScytheAI {
   /**
    * Get adjacent positions on the board
    */
-  getAdjacentPositions(position) {
-    const positions = [];
+  getAdjacentPositions(position: Position): Position[] {
+    const positions: Position[] = [];
     const directions = [
       { x: 0, y: 1 },
       { x: 0, y: -1 },
@@ -193,7 +207,7 @@ export class ScytheAI {
     ];
 
     directions.forEach(dir => {
-      const newPos = {
+      const newPos: Position = {
         x: Math.max(0, Math.min(8, position.x + dir.x)),
         y: Math.max(0, Math.min(8, position.y + dir.y))
       };
@@ -206,14 +220,14 @@ export class ScytheAI {
   /**
    * Calculate the best action using lookahead
    */
-  calculateBestAction(gameState, depth = 0) {
+  calculateBestAction(gameState: GameState, depth: number = 0): GameAction | null {
     if (depth >= this.lookaheadDepth) {
       return null;
     }
 
     const possibleActions = this.generatePossibleActions(gameState, gameState.ai);
     
-    let bestAction = null;
+    let bestAction: GameAction | null = null;
     let bestScore = -Infinity;
 
     possibleActions.forEach(action => {
@@ -233,11 +247,11 @@ export class ScytheAI {
 /**
  * Get action recommendations for the player
  */
-export function getActionRecommendations(gameState) {
+export function getActionRecommendations(gameState: GameState): ActionRecommendation[] {
   const ai = new ScytheAI('hard');
   const possibleActions = ai.generatePossibleActions(gameState, gameState.player);
   
-  const evaluatedActions = possibleActions.map(action => ({
+  const evaluatedActions: ActionRecommendation[] = possibleActions.map(action => ({
     action,
     score: ai.evaluateAction(gameState, 'player', action),
     description: getActionDescription(action)
@@ -248,7 +262,7 @@ export function getActionRecommendations(gameState) {
   return evaluatedActions.slice(0, 5);
 }
 
-function getActionDescription(action) {
+function getActionDescription(action: GameAction): string {
   switch (action.type) {
     case ACTIONS.PRODUCE:
       return 'Produce resources (Wood, Food) - Cost: 1 Coin';
@@ -257,9 +271,11 @@ function getActionDescription(action) {
     case ACTIONS.BOLSTER:
       return 'Gain Power and Popularity - Cost: 1 Coin';
     case ACTIONS.BUILD:
-      return `Build ${action.buildingType} - Cost: 3 Wood, 2 Coins`;
+      return `Build ${action.buildingType ?? 'structure'} - Cost: 3 Wood, 2 Coins`;
     case ACTIONS.MOVE:
-      return `Move to (${action.destination.x}, ${action.destination.y})`;
+      return action.destination 
+        ? `Move to (${action.destination.x}, ${action.destination.y})`
+        : 'Move';
     default:
       return 'Unknown action';
   }

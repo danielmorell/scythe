@@ -4,20 +4,20 @@ import PlayerDashboard from './components/PlayerDashboard'
 import ActionPanel from './components/ActionPanel'
 import GameBoard from './components/GameBoard'
 import GameLog from './components/GameLog'
-import { createInitialGameState, FACTIONS, ACTIONS, RESOURCES, applyAction, switchTurn, calculateScore } from './game/gameState'
-import { ScytheAI, getActionRecommendations } from './game/ai'
+import { createInitialGameState, FACTIONS, ACTIONS, RESOURCES, applyAction, switchTurn, calculateScore, GameState, GameAction, ActionType } from './game/gameState'
+import { ScytheAI, getActionRecommendations, Difficulty, ActionRecommendation } from './game/ai'
 
 function App() {
-  const [gameState, setGameState] = useState(null);
-  const [ai, setAI] = useState(null);
-  const [difficulty, setDifficulty] = useState('medium');
-  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [ai, setAI] = useState<ScytheAI | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
 
   // Calculate recommendations when needed
-  const recommendations = showRecommendations && gameState 
+  const recommendations: ActionRecommendation[] = showRecommendations && gameState 
     ? getActionRecommendations(gameState) 
     : [];
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
 
   useEffect(() => {
     if (gameState && gameState.currentPlayer === 'ai' && ai) {
@@ -33,7 +33,7 @@ function App() {
     }
   }, [gameState, ai]);
 
-  const startGame = (selectedDifficulty) => {
+  const startGame = (selectedDifficulty: Difficulty) => {
     const initialState = createInitialGameState(FACTIONS.POLANIA, FACTIONS.RUSVIET);
     setGameState(initialState);
     setAI(new ScytheAI(selectedDifficulty));
@@ -41,7 +41,7 @@ function App() {
     setGameStarted(true);
   };
 
-  const handlePlayerAction = (action) => {
+  const handlePlayerAction = (action: GameAction) => {
     if (!gameState || gameState.currentPlayer !== 'player') return;
 
     const newState = applyAction(gameState, 'player', action);
@@ -49,7 +49,7 @@ function App() {
     setGameState(nextState);
   };
 
-  const canAfford = (actionType) => {
+  const canAfford = (actionType: ActionType): boolean => {
     if (!gameState) return false;
     const player = gameState.player;
 
@@ -73,7 +73,7 @@ function App() {
     setShowRecommendations(false);
   };
 
-  if (!gameStarted) {
+  if (!gameStarted || !gameState) {
     return (
       <div className="App">
         <header className="app-header">

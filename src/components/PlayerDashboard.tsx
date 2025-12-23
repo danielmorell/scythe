@@ -1,7 +1,12 @@
-import React from 'react';
 import './PlayerDashboard.css';
+import { PlayerState } from '../game/gameState';
 
-export default function PlayerDashboard({ playerState, isAI = false }) {
+type PlayerDashboardProps = {
+  playerState: PlayerState;
+  isAI?: boolean;
+};
+
+export default function PlayerDashboard({ playerState, isAI = false }: PlayerDashboardProps) {
   return (
     <div className={`player-dashboard ${isAI ? 'ai-dashboard' : 'player-dashboard'}`}>
       <div className="dashboard-header">
