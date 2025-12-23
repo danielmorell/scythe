@@ -1,0 +1,328 @@
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.app-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.game-info {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.turn-indicator {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.difficulty-badge {
+  background: rgba(255, 255, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.game-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.control-btn {
+  background: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.control-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn.reset {
+  background: #f5576c;
+  color: white;
+}
+
+.recommendations-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.recommendations-panel h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.rec-rank {
+  background: #667eea;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.9rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.rec-description {
+  flex: 1;
+  color: #333;
+}
+
+.rec-score {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.score-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.score-item {
+  flex: 1;
+  text-align: center;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.player-score {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.ai-score {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.score-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.ai-thinking {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.thinking-animation {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f5576c;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.start-screen {
+  max-width: 800px;
+  margin: 50px auto;
+}
+
+.welcome-box {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-box h2 {
+  color: #333;
+  margin: 0 0 15px 0;
+}
+
+.welcome-box > p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.difficulty-selection {
+  margin-bottom: 30px;
+}
+
+.difficulty-selection h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.difficulty-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.difficulty-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.difficulty-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+}
+
+.difficulty-btn.easy {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+.difficulty-btn.hard {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.difficulty-desc {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  font-weight: normal;
+}
+
+.game-features {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.game-features h3 {
+  color: #333;
+  margin: 0 0 15px 0;
+}
+
+.game-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.game-features li {
+  color: #666;
+  padding: 8px 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .difficulty-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .App {
+    padding: 10px;
+  }
+  
+  .app-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .game-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .welcome-box {
+    padding: 20px;
+  }
+}

@@ -1,0 +1,124 @@
+.game-board {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.game-board h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.territory {
+  aspect-ratio: 1;
+  background: #e8f5e9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.territory:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.territory.factory {
+  background: #ffe082;
+  border-color: #ffc107;
+  font-weight: bold;
+}
+
+.territory.player-position {
+  background: #bbdefb;
+  border-color: #2196f3;
+  border-width: 2px;
+}
+
+.territory.ai-position {
+  background: #ffcdd2;
+  border-color: #f44336;
+  border-width: 2px;
+}
+
+.territory-icon {
+  font-size: 1.2rem;
+}
+
+.unit-marker {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.8rem;
+  background: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.player-marker {
+  border: 2px solid #2196f3;
+}
+
+.ai-marker {
+  border: 2px solid #f44336;
+}
+
+.board-legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.legend-icon {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .board-grid {
+    max-width: 100%;
+  }
+  
+  .territory-icon {
+    font-size: 1rem;
+  }
+  
+  .board-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
