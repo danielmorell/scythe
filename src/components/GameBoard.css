@@ -70,6 +70,15 @@
   border-top: none;
 }
 
+.hex-territory.factory .hexagon {
+  background-color: #ffe082;
+}
+
+.hex-territory.factory .hexagon:before,
+.hex-territory.factory .hexagon:after {
+  border-color: #ffc107;
+}
+
 .hex-content {
   position: absolute;
   top: 50%;
@@ -84,13 +93,82 @@
   justify-content: center;
 }
 
-.hex-territory.factory .hexagon {
-  background-color: #ffe082;
+/* Water tiles styling */
+.hex-territory .hexagon[data-type="lake"],
+.hex-territory .hexagon[data-type="river"] {
+  background-color: #b3e5fc;
 }
 
-.hex-territory.factory .hexagon:before,
-.hex-territory.factory .hexagon:after {
-  border-color: #ffc107;
+.hex-territory .hexagon[data-type="lake"]:before,
+.hex-territory .hexagon[data-type="lake"]:after,
+.hex-territory .hexagon[data-type="river"]:before,
+.hex-territory .hexagon[data-type="river"]:after {
+  background-color: #b3e5fc;
+  border-color: #03a9f4;
+}
+
+/* Lake territory styling */
+.hex-territory:has(.territory-icon:contains("🌊")) .hexagon {
+  background-color: #b3e5fc;
+}
+
+.hex-territory:has(.territory-icon:contains("🌊")) .hexagon:before,
+.hex-territory:has(.territory-icon:contains("🌊")) .hexagon:after {
+  background-color: #b3e5fc;
+  border-color: #03a9f4;
+}
+
+/* River edges */
+.river-edge {
+  position: absolute;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #03a9f4, transparent);
+  z-index: 3;
+  transform-origin: center;
+}
+
+/* Position rivers on each of the 6 hex edges */
+.river-direction-0 {
+  /* East */
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.river-direction-1 {
+  /* Northeast */
+  right: -10px;
+  top: 15%;
+  transform: translate(0, -50%) rotate(-60deg);
+}
+
+.river-direction-2 {
+  /* Northwest */
+  left: -10px;
+  top: 15%;
+  transform: translate(0, -50%) rotate(60deg);
+}
+
+.river-direction-3 {
+  /* West */
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.river-direction-4 {
+  /* Southwest */
+  left: -10px;
+  bottom: 15%;
+  transform: translate(0, 50%) rotate(-60deg);
+}
+
+.river-direction-5 {
+  /* Southeast */
+  right: -10px;
+  bottom: 15%;
+  transform: translate(0, 50%) rotate(60deg);
 }
 
 .hex-territory.player-position .hexagon {

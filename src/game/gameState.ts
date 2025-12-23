@@ -8,6 +8,15 @@ export const FACTIONS = {
   RUSVIET: 'Rusviet Union'
 } as const;
 
+// Faction abilities for water movement
+export const FACTION_ABILITIES = {
+  NORDIC: { riverwalk: true, lakes: false },      // Can cross rivers
+  CRIMEA: { riverwalk: false, lakes: false },     // No water abilities
+  SAXONY: { riverwalk: false, lakes: false },     // No water abilities
+  POLANIA: { riverwalk: false, lakes: true },     // Can cross lakes
+  RUSVIET: { riverwalk: true, lakes: false }      // Can cross rivers
+} as const;
+
 export const RESOURCES = {
   COIN: 'coin',
   POWER: 'power',
@@ -44,6 +53,11 @@ export type ResourceMap = {
 
 export type PlayerType = 'player' | 'ai';
 
+export type FactionAbilities = {
+  riverwalk: boolean;
+  lakes: boolean;
+};
+
 export type PlayerState = {
   faction: Faction;
   type: PlayerType;
@@ -57,6 +71,7 @@ export type PlayerState = {
   position: Position;
   buildings: Building[];
   completedObjectives: string[];
+  abilities: FactionAbilities;
 };
 
 export type Building = {
@@ -64,7 +79,7 @@ export type Building = {
   position: Position;
 };
 
-export type TerritoryType = 'factory' | 'forest' | 'mountain' | 'village' | 'tundra' | 'farm';
+export type TerritoryType = 'factory' | 'forest' | 'mountain' | 'village' | 'tundra' | 'farm' | 'lake';
 
 export type Territory = {
   x: number;
@@ -72,6 +87,11 @@ export type Territory = {
   type: TerritoryType;
   resources: string[];
   controlled: PlayerType | null;
+  rivers: RiverEdge[];  // Rivers on the edges of this territory
+};
+
+export type RiverEdge = {
+  direction: number;  // 0-5 for the 6 hex edges (0=E, 1=NE, 2=NW, 3=W, 4=SW, 5=SE)
 };
 
 export type Board = {
@@ -113,6 +133,28 @@ export function createInitialGameState(playerFaction: Faction, aiFaction: Factio
 }
 
 function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
+  // Get faction abilities based on faction
+  let abilities: FactionAbilities;
+  switch (faction) {
+    case FACTIONS.NORDIC:
+      abilities = FACTION_ABILITIES.NORDIC;
+      break;
+    case FACTIONS.CRIMEA:
+      abilities = FACTION_ABILITIES.CRIMEA;
+      break;
+    case FACTIONS.SAXONY:
+      abilities = FACTION_ABILITIES.SAXONY;
+      break;
+    case FACTIONS.POLANIA:
+      abilities = FACTION_ABILITIES.POLANIA;
+      break;
+    case FACTIONS.RUSVIET:
+      abilities = FACTION_ABILITIES.RUSVIET;
+      break;
+    default:
+      abilities = { riverwalk: false, lakes: false };
+  }
+
   return {
     faction,
     type,
@@ -133,7 +175,8 @@ function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
     },
     position: { x: 0, y: 0 },
     buildings: [],
-    completedObjectives: []
+    completedObjectives: [],
+    abilities
   };
 }
 
@@ -160,7 +203,8 @@ function generateTerritories(): Territory[] {
         y: r,
         type: getTerritoryType(q, r),
         resources: [],
-        controlled: null
+        controlled: null,
+        rivers: getRivers(q, r)
       });
     }
   }
@@ -168,9 +212,38 @@ function generateTerritories(): Territory[] {
   return territories;
 }
 
+function getRivers(q: number, r: number): RiverEdge[] {
+  const rivers: RiverEdge[] = [];
+  const distance = Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r));
+  
+  // Add rivers on specific edges for rings 1-3
+  if (distance >= 1 && distance <= 3) {
+    const riverHash = (q * 31 + r * 37) % 17;
+    
+    // Deterministically add rivers on certain edges
+    if (Math.abs(riverHash % 6) < 2) {
+      rivers.push({ direction: Math.abs(riverHash % 6) });
+    }
+    if (Math.abs((riverHash * 2) % 7) < 2) {
+      rivers.push({ direction: Math.abs((riverHash * 2) % 6) });
+    }
+  }
+  
+  return rivers;
+}
+
 function getTerritoryType(q: number, r: number): TerritoryType {
   // Factory at center
   if (q === 0 && r === 0) return 'factory';
+  
+  // Calculate distance from center
+  const distance = Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r));
+  
+  // Create lakes at specific positions (ring 2 and 3)
+  if (distance === 2 || distance === 3) {
+    const lakeHash = (q * 13 + r * 17) % 11;
+    if (Math.abs(lakeHash) < 2) return 'lake';
+  }
   
   // Random terrain types based on axial coordinates
   const hash = (q * 7 + r * 11) % 5;
@@ -323,4 +396,61 @@ export function calculateScore(playerState: PlayerState): number {
   score += playerState.buildings.length * 3;
   
   return score;
+}
+
+/**
+ * Check if a player can move to a destination territory
+ */
+export function canMoveTo(
+  gameState: GameState,
+  player: PlayerType,
+  sourcePos: Position,
+  destination: Position
+): boolean {
+  const playerState = gameState[player];
+  const destTerritory = gameState.board.territories.find(
+    t => t.x === destination.x && t.y === destination.y
+  );
+  
+  if (!destTerritory) return false;
+  
+  // Check if destination is a lake
+  if (destTerritory.type === 'lake') {
+    // Need lake ability to move to lakes
+    return playerState.abilities.lakes;
+  }
+  
+  // Check if there's a river between source and destination
+  const sourceTerritory = gameState.board.territories.find(
+    t => t.x === sourcePos.x && t.y === sourcePos.y
+  );
+  
+  if (sourceTerritory && hasRiverBetween(sourceTerritory, destination)) {
+    // Need riverwalk ability to cross rivers
+    return playerState.abilities.riverwalk;
+  }
+  
+  // All other terrain types are accessible
+  return true;
+}
+
+/**
+ * Check if there's a river between two adjacent hexes
+ */
+function hasRiverBetween(territory: Territory, destination: Position): boolean {
+  // Calculate direction from territory to destination
+  const dx = destination.x - territory.x;
+  const dy = destination.y - territory.y;
+  
+  // Map direction to edge number (0-5)
+  let direction = -1;
+  if (dx === 1 && dy === 0) direction = 0;      // East
+  else if (dx === 1 && dy === -1) direction = 1; // Northeast
+  else if (dx === 0 && dy === -1) direction = 2; // Northwest
+  else if (dx === -1 && dy === 0) direction = 3; // West
+  else if (dx === -1 && dy === 1) direction = 4; // Southwest
+  else if (dx === 0 && dy === 1) direction = 5;  // Southeast
+  
+  // Check if this edge has a river
+  return territory.rivers.some(river => river.direction === direction);
 }

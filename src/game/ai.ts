@@ -1,6 +1,6 @@
 // Scythe AI Decision Making
 
-import { ACTIONS, RESOURCES, applyAction, calculateScore, GameState, PlayerState, GameAction, Position, PlayerType } from './gameState';
+import { ACTIONS, RESOURCES, applyAction, calculateScore, GameState, PlayerState, GameAction, Position, PlayerType, canMoveTo } from './gameState';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -52,7 +52,7 @@ export class ScytheAI {
   /**
    * Generate all possible actions for the AI
    */
-  generatePossibleActions(_gameState: GameState, playerState: PlayerState): GameAction[] {
+  generatePossibleActions(gameState: GameState, playerState: PlayerState): GameAction[] {
     const actions: GameAction[] = [];
 
     // Produce action
@@ -75,10 +75,12 @@ export class ScytheAI {
       actions.push({ type: ACTIONS.BUILD, buildingType: 'monument' });
     }
 
-    // Move actions (simplified)
+    // Move actions - only include valid moves based on faction abilities
     const adjacentPositions = this.getAdjacentPositions(playerState.position);
     adjacentPositions.forEach(pos => {
-      actions.push({ type: ACTIONS.MOVE, destination: pos });
+      if (canMoveTo(gameState, playerState.type, playerState.position, pos)) {
+        actions.push({ type: ACTIONS.MOVE, destination: pos });
+      }
     });
 
     return actions;

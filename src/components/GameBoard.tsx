@@ -16,6 +16,7 @@ export default function GameBoard({ board, playerPosition, aiPosition }: GameBoa
       case 'village': return '🏘️';
       case 'tundra': return '❄️';
       case 'farm': return '🌾';
+      case 'lake': return '🌊';
       default: return '📍';
     }
   };
@@ -61,6 +62,13 @@ export default function GameBoard({ board, playerPosition, aiPosition }: GameBoa
                     <div className="unit-marker ai-marker">🤖</div>
                   )}
                 </div>
+                {/* Render rivers on edges */}
+                {territory.rivers.map((river, riverIdx) => (
+                  <div
+                    key={riverIdx}
+                    className={`river-edge river-direction-${river.direction}`}
+                  />
+                ))}
               </div>
             </div>
           );
