@@ -17,7 +17,27 @@ export default function GameBoard({ board, playerPosition, aiPosition }: GameBoa
       case 'tundra': return '❄️';
       case 'farm': return '🌾';
       case 'lake': return '🌊';
-      default: return '📍';
+      default: return '⛺';
+    }
+  };
+
+  const getTerritoryColor = (type: TerritoryType): string => {
+    switch (type) {
+      case 'factory': return '#A9A9A9';
+      case 'forest': return '#60524e';
+      case 'mountain': return '#a6a6a6';
+      case 'village': return '#a36c6c';
+      case 'tundra': return '#697e9c';
+      case 'farm': return '#aaa175';
+      case 'lake': return '#1E90FF';
+        case "albion_home": return '#284925';
+        case "crimea_home": return '#bca50e';
+        case 'nordic_home': return '#13458f';
+        case "polania_home": return '#efefef';
+        case "rusviet_home": return '#ba1c1c';
+        case "saxony_home": return '#191918';
+        case "togawa_home": return '#48317e';
+        default: return '#D3D3D3';
     }
   };
 
@@ -34,8 +54,8 @@ export default function GameBoard({ board, playerPosition, aiPosition }: GameBoa
     const x = size * (Math.sqrt(3) * q + Math.sqrt(3)/2 * r);
     const y = size * (3/2 * r);
     return { 
-      left: x + 300, // Center offset
-      top: y + 250   // Center offset
+      left: x + 500, // Center offset
+      top: y + 350   // Center offset
     };
   };
 
@@ -44,17 +64,19 @@ export default function GameBoard({ board, playerPosition, aiPosition }: GameBoa
       <h3>Game Board</h3>
       <div className="hexagonal-board">
         {board.territories.map((territory, idx) => {
+            if (territory.type === 'empty') return null;
           const pos = hexToPixel(territory.x, territory.y);
           return (
             <div
               key={idx}
               className={`hex-territory ${getTerritoryClass(territory.x, territory.y)}`}
-              style={{ left: `${pos.left}px`, top: `${pos.top}px` }}
+              style={{ left: `${pos.left}px`, top: `${pos.top}px`}}
               title={`${territory.type} (${territory.x}, ${territory.y})`}
             >
-              <div className="hexagon">
+              <div className="hexagon" style={{backgroundColor: getTerritoryColor(territory.type)}}>
                 <div className="hex-content">
                   <div className="territory-icon">{getTerritoryIcon(territory.type)}</div>
+                  {/*<div>({territory.x}, {territory.y})</div>*/}
                   {playerPosition.x === territory.x && playerPosition.y === territory.y && (
                     <div className="unit-marker player-marker">👤</div>
                   )}
