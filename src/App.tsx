@@ -17,6 +17,9 @@ import {
   GameAction,
   ActionType,
   getAvailableActionColumns,
+  PlayerMatType,
+  PLAYER_MAT_CONFIGURATIONS,
+  Faction,
 } from "./game/gameState";
 import {
   ScytheAI,
@@ -32,6 +35,11 @@ function App() {
   const [showRecommendations, setShowRecommendations] =
     useState<boolean>(false);
   const [selectedColumn, setSelectedColumn] = useState<number | null>(null);
+  const [selectedFaction, setSelectedFaction] = useState<Faction>(
+    FACTIONS.POLANIA,
+  );
+  const [selectedPlayerMat, setSelectedPlayerMat] =
+    useState<PlayerMatType>("INDUSTRIAL");
 
   // Calculate recommendations when needed
   const recommendations: ActionRecommendation[] =
@@ -57,9 +65,25 @@ function App() {
   }, [gameState, ai]);
 
   const startGame = (selectedDifficulty: Difficulty) => {
+    // AI gets a random faction and player mat
+    const aiFactions = Object.values(FACTIONS).filter(
+      (f) => f !== selectedFaction,
+    );
+    const aiFaction: Faction =
+      aiFactions[Math.floor(Math.random() * aiFactions.length)] ||
+      FACTIONS.RUSVIET;
+    const aiPlayerMats = Object.keys(PLAYER_MAT_CONFIGURATIONS).filter(
+      (m) => m !== selectedPlayerMat,
+    ) as PlayerMatType[];
+    const aiMat: PlayerMatType =
+      aiPlayerMats[Math.floor(Math.random() * aiPlayerMats.length)] ||
+      "ENGINEERING";
+
     const initialState = createInitialGameState(
-      FACTIONS.POLANIA,
-      FACTIONS.RUSVIET,
+      selectedFaction,
+      aiFaction,
+      selectedPlayerMat,
+      aiMat,
     );
     setGameState(initialState);
     setAI(new ScytheAI(selectedDifficulty));
@@ -114,6 +138,11 @@ function App() {
   };
 
   if (!gameStarted || !gameState) {
+    // Helper to get faction name from FactionTypes
+    const getFactionName = (faction: Faction): string => {
+      return faction;
+    };
+
     return (
       <div className="App">
         <header className="app-header">
@@ -129,6 +158,44 @@ function App() {
               resources, expand your territory, and outmaneuver your opponent to
               victory!
             </p>
+
+            <div className="difficulty-selection">
+              <h3>Select Your Faction</h3>
+              <div className="faction-selection">
+                {Object.values(FACTIONS).map((faction) => (
+                  <button
+                    key={faction}
+                    className={`faction-btn ${selectedFaction === faction ? "selected" : ""}`}
+                    onClick={() => setSelectedFaction(faction)}
+                  >
+                    {getFactionName(faction)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="difficulty-selection">
+              <h3>Select Your Player Mat</h3>
+              <div className="player-mat-selection">
+                {(
+                  Object.keys(
+                    PLAYER_MAT_CONFIGURATIONS,
+                  ) as PlayerMatType[]
+                ).map((matType) => {
+                  const mat = PLAYER_MAT_CONFIGURATIONS[matType];
+                  return (
+                    <button
+                      key={matType}
+                      className={`mat-btn ${selectedPlayerMat === matType ? "selected" : ""}`}
+                      onClick={() => setSelectedPlayerMat(matType)}
+                    >
+                      {mat.name.charAt(0).toUpperCase() + mat.name.slice(1)} (
+                      #{mat.number})
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="difficulty-selection">
               <h3>Select AI Difficulty</h3>

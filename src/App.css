@@ -344,6 +344,84 @@
   font-weight: normal;
 }
 
+.faction-selection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.faction-btn {
+  background: linear-gradient(135deg, #5a4a3a 0%, #443525 100%);
+  border: 2px solid #6b5642;
+  border-radius: 4px;
+  padding: 15px 10px;
+  color: #fef5e7;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.faction-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #6a5a4a 0%, #544535 100%);
+}
+
+.faction-btn.selected {
+  background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
+  border-color: #d4a017;
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.player-mat-selection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.mat-btn {
+  background: linear-gradient(135deg, #5a4a3a 0%, #443525 100%);
+  border: 2px solid #6b5642;
+  border-radius: 4px;
+  padding: 15px 10px;
+  color: #fef5e7;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.mat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #6a5a4a 0%, #544535 100%);
+}
+
+.mat-btn.selected {
+  background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
+  border-color: #d4a017;
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
 .game-features {
   background: rgba(60, 48, 35, 0.6);
   border-radius: 4px;

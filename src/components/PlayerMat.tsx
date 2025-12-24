@@ -67,12 +67,12 @@ export default function PlayerMat({
 
   return (
     <div className="player-mat">
-      <h3>Player Mat: {playerState.playerMat}</h3>
+      <h3>Player Mat: {mat.name.charAt(0).toUpperCase() + mat.name.slice(1)} (#{mat.number})</h3>
       <p className="mat-info">
         Choose an action column (cannot repeat last column)
       </p>
       <div className="mat-columns">
-        {mat.map((column, index) => {
+        {mat.actions.map((column, index) => {
           const isAvailable = availableColumns.includes(index);
           const isLast = playerState.lastActionColumn === index;
 
@@ -84,19 +84,19 @@ export default function PlayerMat({
             >
               <div className="top-action">
                 <div className="action-label">
-                  {getActionLabel(column.topAction)}
+                  {getActionLabel(column.topAction.type)}
                 </div>
                 <div className="action-desc">
-                  {getActionDescription(column.topAction)}
+                  {getActionDescription(column.topAction.type)}
                 </div>
               </div>
               <div className="action-divider">+</div>
               <div className="bottom-action">
                 <div className="action-label">
-                  {getActionLabel(column.bottomAction)}
+                  {getActionLabel(column.bottomAction.type)}
                 </div>
                 <div className="action-desc">
-                  {getActionDescription(column.bottomAction)}
+                  {getActionDescription(column.bottomAction.type)}
                 </div>
               </div>
               {isLast && <div className="last-used-badge">Last Turn</div>}

@@ -1,5 +1,5 @@
 import "./ActionPanel.css";
-import { ACTIONS, GameAction, ActionType } from "../game/gameState";
+import { GameAction, ActionType } from "../game/gameState";
 import { ActionRecommendation } from "../game/ai";
 
 type ActionPanelProps = {
@@ -24,25 +24,25 @@ export default function ActionPanel({
 }: ActionPanelProps) {
   const actions: ActionInfo[] = [
     {
-      type: ACTIONS.PRODUCE,
+      type: ActionType.Produce,
       label: "🏭 Produce",
       description: "Gain 2 Wood, 1 Food",
       cost: "1 Coin",
     },
     {
-      type: ACTIONS.TRADE,
+      type: ActionType.Trade,
       label: "🤝 Trade",
       description: "Convert resources to coins",
       cost: "2 Wood",
     },
     {
-      type: ACTIONS.BOLSTER,
+      type: ActionType.Bolster,
       label: "💪 Bolster",
       description: "Gain 2 Power, 1 Popularity",
       cost: "1 Coin",
     },
     {
-      type: ACTIONS.BUILD,
+      type: ActionType.Build,
       label: "🏗️ Build",
       description: "Construct a building",
       cost: "3 Wood, 2 Coins",

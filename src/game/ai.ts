@@ -11,6 +11,7 @@ import {
   Position,
   PlayerType,
   canMoveTo,
+  ActionType,
 } from "./gameState";
 
 export type Difficulty = "easy" | "medium" | "hard";
@@ -40,7 +41,7 @@ export class ScytheAI {
 
     if (possibleActions.length === 0) {
       // Default to produce if no actions available
-      return { type: ACTIONS.PRODUCE };
+      return { type: ActionType.Produce };
     }
 
     // Evaluate each action
@@ -74,17 +75,17 @@ export class ScytheAI {
 
     // Produce action
     if (playerState.resources[RESOURCES.COIN] >= 1) {
-      actions.push({ type: ACTIONS.PRODUCE });
+      actions.push({ type: ActionType.Produce });
     }
 
     // Trade action
     if (playerState.resources[RESOURCES.WOOD] >= 2) {
-      actions.push({ type: ACTIONS.TRADE });
+      actions.push({ type: ActionType.Trade });
     }
 
     // Bolster action
     if (playerState.resources[RESOURCES.COIN] >= 1) {
-      actions.push({ type: ACTIONS.BOLSTER });
+      actions.push({ type: ActionType.Bolster });
     }
 
     // Build action
@@ -92,14 +93,14 @@ export class ScytheAI {
       playerState.resources[RESOURCES.WOOD] >= 3 &&
       playerState.resources[RESOURCES.COIN] >= 2
     ) {
-      actions.push({ type: ACTIONS.BUILD, buildingType: "monument" });
+      actions.push({ type: ActionType.Build, buildingType: "monument" });
     }
 
     // Move actions - only include valid moves based on faction abilities
     const adjacentPositions = this.getAdjacentPositions(playerState.position);
     adjacentPositions.forEach((pos) => {
       if (canMoveTo(gameState, playerState.type, playerState.position, pos)) {
-        actions.push({ type: ACTIONS.MOVE, destination: pos });
+        actions.push({ type: ActionType.Move, destination: pos });
       }
     });
 

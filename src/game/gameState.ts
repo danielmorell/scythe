@@ -1404,18 +1404,46 @@ export type GameAction = {
 export function createInitialGameState(
   playerFaction: Faction,
   aiFaction: Faction,
+  playerMat?: PlayerMatType,
+  aiMat?: PlayerMatType,
 ): GameState {
   return {
     currentTurn: 0,
     currentPlayer: "player",
-    player: createPlayerState(playerFaction, "player"),
-    ai: createPlayerState(aiFaction, "ai"),
+    player: createPlayerState(
+      playerFaction,
+      "player",
+      playerMat || "INDUSTRIAL",
+    ),
+    ai: createPlayerState(aiFaction, "ai", aiMat || "ENGINEERING"),
     board: createBoard(),
     gameLog: [],
   };
 }
 
-function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
+// Helper function to map old faction names to new FactionTypes
+function getFactionType(faction: Faction): FactionTypes {
+  switch (faction) {
+    case FACTIONS.NORDIC:
+      return FactionTypes.Nordic;
+    case FACTIONS.CRIMEA:
+      return FactionTypes.Crimea;
+    case FACTIONS.SAXONY:
+      return FactionTypes.Saxony;
+    case FACTIONS.POLANIA:
+      return FactionTypes.Polania;
+    case FACTIONS.RUSVIET:
+      return FactionTypes.Rusviet;
+    default:
+      return FactionTypes.Polania;
+  }
+}
+
+function createPlayerState(
+  faction: Faction,
+  type: PlayerType,
+  playerMatType: PlayerMatType,
+): PlayerState {
   // Get faction abilities based on faction
   let abilities: FactionAbilities;
   switch (faction) {
@@ -1438,22 +1466,37 @@ function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
       abilities = { riverwalk: false, lakes: false };
   }
 
-  // Assign player mats - player gets Industrial, AI gets Engineering
-  const playerMat: PlayerMatType =
-    type === "player" ? "INDUSTRIAL" : "ENGINEERING";
+  // Get faction mat data for starting resources
+  const factionType = getFactionType(faction);
+  const factionMat = FACTION_MATS[factionType];
+  const playerMatConfig = PLAYER_MAT_CONFIGURATIONS[playerMatType];
+
+  // Initialize resources from faction mat and player mat
+  const resources: ResourceMap = {
+    [RESOURCES.COIN]: 0,
+    [RESOURCES.POWER]: 0,
+    [RESOURCES.POPULARITY]: 0,
+    [RESOURCES.WOOD]: 0,
+    [RESOURCES.FOOD]: 0,
+    [RESOURCES.METAL]: 0,
+    [RESOURCES.OIL]: 0,
+    [RESOURCES.COMBAT_CARD]: 0,
+  };
+
+  // Add faction starting resources
+  factionMat.startingResources.forEach((resource) => {
+    resources[resource] = (resources[resource] || 0) + 1;
+  });
+
+  // Add player mat starting resources
+  playerMatConfig.startingResources.forEach((resource) => {
+    resources[resource] = (resources[resource] || 0) + 1;
+  });
 
   return {
     faction,
     type,
-    resources: {
-      [RESOURCES.COIN]: 10,
-      [RESOURCES.POWER]: 0,
-      [RESOURCES.POPULARITY]: 0,
-      [RESOURCES.WOOD]: 2,
-      [RESOURCES.FOOD]: 2,
-      [RESOURCES.METAL]: 2,
-      [RESOURCES.OIL]: 0,
-    },
+    resources,
     stars: 0,
     units: {
       workers: 2,
@@ -1464,7 +1507,7 @@ function createPlayerState(faction: Faction, type: PlayerType): PlayerState {
     buildings: [],
     completedObjectives: [],
     abilities,
-    playerMat,
+    playerMat: playerMatType,
     lastActionColumn: null,
   };
 }
@@ -1622,11 +1665,11 @@ export function applyAction(
   // If column index provided, execute bottom row action and track column usage
   if (columnIndex !== undefined) {
     const mat = PLAYER_MAT_CONFIGURATIONS[playerState.playerMat];
-    const column = mat[columnIndex];
+    const column = mat.actions[columnIndex];
 
-    // Execute bottom row action if it matches the action type
-    if (column && column.topAction === action.type) {
-      executeBottomAction(newState, player, column.bottomAction);
+    // Execute bottom row action
+    if (column && column.bottomAction) {
+      executeBottomAction(newState, player, column.bottomAction.type);
 
       // Track last action column (can't use same column on next turn)
       playerState.lastActionColumn = columnIndex;
@@ -1786,7 +1829,7 @@ export function getAvailableActionColumns(playerState: PlayerState): number[] {
   const availableColumns: number[] = [];
 
   // Can use any column except the one used last turn
-  for (let i = 0; i < mat.length; i++) {
+  for (let i = 0; i < mat.actions.length; i++) {
     if (playerState.lastActionColumn !== i) {
       availableColumns.push(i);
     }
