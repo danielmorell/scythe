@@ -116,7 +116,7 @@ export type Building = {
   position: Position;
 };
 
-export type TerritoryType = 'factory' | 'forest' | 'mountain' | 'village' | 'tundra' | 'farm' | 'lake';
+export type TerritoryType = 'factory' | 'forest' | 'mountain' | 'village' | 'tundra' | 'farm' | 'lake' | 'nordic_home' | 'crimea_home' | 'saxony_home' | 'polania_home' | 'rusviet_home' | 'albion_home' | 'togawa_home' | 'empty';
 
 export type Territory = {
   x: number;
@@ -233,8 +233,8 @@ function createBoard(): Board {
 function generateTerritories(): Territory[] {
   const territories: Territory[] = [];
   // Generate hexagonal grid using axial coordinates
-  // Create a hexagonal board with radius 4 (center at 0,0)
-  const radius = 4;
+  // Create a hexagonal board with radius 5 (center at 0,0)
+  const radius = 5;
   
   for (let q = -radius; q <= radius; q++) {
     const r1 = Math.max(-radius, -q - radius);
@@ -277,21 +277,71 @@ function getRivers(q: number, r: number): RiverEdge[] {
 function getTerritoryType(q: number, r: number): TerritoryType {
   // Factory at center
   if (q === 0 && r === 0) return 'factory';
-  
-  // Calculate distance from center
-  const distance = Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r));
-  
-  // Create lakes at specific positions (ring 2 and 3)
-  if (distance === 2 || distance === 3) {
-    const lakeHash = (q * 13 + r * 17) % 11;
-    if (Math.abs(lakeHash) < 2) return 'lake';
-  }
-  
-  // Random terrain types based on axial coordinates
-  const hash = (q * 7 + r * 11) % 5;
-  const absHash = Math.abs(hash);
-  const types: TerritoryType[] = ['forest', 'mountain', 'village', 'tundra', 'farm'];
-  return types[absHash]!;
+  if (q === 0 && r === 1) return 'lake';
+  if (q === 0 && r === -1) return 'forest';
+  if (q === 0 && r === 2) return 'forest';
+  if (q === 0 && r === -2) return 'lake';
+  if (q === 0 && r === 3) return 'village';
+  if (q === 0 && r === -3) return 'farm';
+  if (q === 0 && r === -4) return 'albion_home';
+
+  if (q === 1 && r === 0) return 'mountain';
+  if (q === 1 && r === 1) return 'village';
+  if (q === 1 && r === -1) return 'lake';
+  if (q === 1 && r === 2) return 'mountain';
+  if (q === 1 && r === -2) return 'tundra';
+  if (q === 1 && r === 3) return 'farm';
+  if (q === 1 && r === -3) return 'village';
+
+  if (q === 2 && r === 0) return 'tundra';
+  if (q === 2 && r === 1) return 'lake';
+  if (q === 2 && r === -1) return 'forest';
+  if (q === 2 && r === 2) return 'tundra';
+  if (q === 2 && r === -2) return 'mountain';
+  if (q === 2 && r === 3) return 'togawa_home';
+  if (q === 2 && r === -3) return 'forest';
+
+  if (q === 3 && r === 0) return 'mountain';
+  if (q === 3 && r === -1) return 'village';
+  if (q === 3 && r === -2) return 'farm';
+  if (q === 3 && r === -3) return 'tundra';
+  if (q === 3 && r === -4) return 'nordic_home';
+
+  if (q === 4 && r === -1) return 'rusviet_home';
+  if (q === 4 && r === -2) return 'farm';
+  if (q === 4 && r === 3) return 'empty';
+  if (q === 4 && r === -3) return 'village';
+
+    if (q === -1 && r === 0) return 'lake';
+    if (q === -1 && r === 1) return 'tundra';
+    if (q === -1 && r === -1) return 'mountain';
+    if (q === -1 && r === 2) return 'tundra';
+    if (q === -1 && r === -2) return 'tundra';
+    if (q === -1 && r === 3) return 'mountain';
+    if (q === -1 && r === -3) return 'mountain';
+
+    if (q === -2 && r === 0) return 'village';
+    if (q === -2 && r === 1) return 'farm';
+    if (q === -2 && r === -1) return 'forest';
+    if (q === -2 && r === 2) return 'village';
+    if (q === -2 && r === -2) return 'lake';
+    if (q === -2 && r === 3) return 'farm';
+    if (q === -2 && r === 4) return 'village';
+
+    if (q === -3 && r === 0) return 'farm';
+    if (q === -3 && r === 1) return 'forest';
+    if (q === -3 && r === -1) return 'polania_home';
+    if (q === -3 && r === 2) return 'village';
+    if (q === -3 && r === 3) return 'lake';
+    if (q === -3 && r === 4) return 'crimea_home';
+
+    if (q === -4 && r === 1) return 'forest';
+    if (q === -4 && r === 2) return 'mountain';
+    if (q === -4 && r === 3) return 'tundra';
+
+    if (q === -5 && r === 3) return 'saxony_home';
+
+  return 'empty';
 }
 
 export function applyAction(gameState: GameState, player: PlayerType, action: GameAction, columnIndex?: number): GameState {
