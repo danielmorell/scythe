@@ -1,36 +1,54 @@
-import { useState, useEffect } from 'react'
-import './App.css'
-import PlayerDashboard from './components/PlayerDashboard'
-import ActionPanel from './components/ActionPanel'
-import GameBoard from './components/GameBoard'
-import GameLog from './components/GameLog'
-import PlayerMat from './components/PlayerMat'
-import { createInitialGameState, FACTIONS, ACTIONS, RESOURCES, applyAction, switchTurn, calculateScore, GameState, GameAction, ActionType, getAvailableActionColumns } from './game/gameState'
-import { ScytheAI, getActionRecommendations, Difficulty, ActionRecommendation } from './game/ai'
+import { useState, useEffect } from "react";
+import "./App.css";
+import PlayerDashboard from "./components/PlayerDashboard";
+import ActionPanel from "./components/ActionPanel";
+import GameBoard from "./components/GameBoard";
+import GameLog from "./components/GameLog";
+import PlayerMat from "./components/PlayerMat";
+import {
+  createInitialGameState,
+  FACTIONS,
+  ACTIONS,
+  RESOURCES,
+  applyAction,
+  switchTurn,
+  calculateScore,
+  GameState,
+  GameAction,
+  ActionType,
+  getAvailableActionColumns,
+} from "./game/gameState";
+import {
+  ScytheAI,
+  getActionRecommendations,
+  Difficulty,
+  ActionRecommendation,
+} from "./game/ai";
 
 function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [ai, setAI] = useState<ScytheAI | null>(null);
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
-  const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [showRecommendations, setShowRecommendations] =
+    useState<boolean>(false);
   const [selectedColumn, setSelectedColumn] = useState<number | null>(null);
 
   // Calculate recommendations when needed
-  const recommendations: ActionRecommendation[] = showRecommendations && gameState 
-    ? getActionRecommendations(gameState) 
-    : [];
+  const recommendations: ActionRecommendation[] =
+    showRecommendations && gameState ? getActionRecommendations(gameState) : [];
   const [gameStarted, setGameStarted] = useState<boolean>(false);
 
   useEffect(() => {
-    if (gameState && gameState.currentPlayer === 'ai' && ai) {
+    if (gameState && gameState.currentPlayer === "ai" && ai) {
       // AI takes its turn after a short delay
       const timer = setTimeout(() => {
         const aiAction = ai.chooseAction(gameState);
         // AI chooses random available column
         const availableColumns = getAvailableActionColumns(gameState.ai);
-        const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+        const randomColumn =
+          availableColumns[Math.floor(Math.random() * availableColumns.length)];
         // Handle AI action inline to avoid dependency issues
-        const newState = applyAction(gameState, 'ai', aiAction, randomColumn);
+        const newState = applyAction(gameState, "ai", aiAction, randomColumn);
         const nextState = switchTurn(newState);
         setGameState(nextState);
       }, 1000);
@@ -39,7 +57,10 @@ function App() {
   }, [gameState, ai]);
 
   const startGame = (selectedDifficulty: Difficulty) => {
-    const initialState = createInitialGameState(FACTIONS.POLANIA, FACTIONS.RUSVIET);
+    const initialState = createInitialGameState(
+      FACTIONS.POLANIA,
+      FACTIONS.RUSVIET,
+    );
     setGameState(initialState);
     setAI(new ScytheAI(selectedDifficulty));
     setDifficulty(selectedDifficulty);
@@ -48,14 +69,19 @@ function App() {
   };
 
   const handlePlayerAction = (action: GameAction) => {
-    if (!gameState || gameState.currentPlayer !== 'player' || selectedColumn === null) return;
+    if (
+      !gameState ||
+      gameState.currentPlayer !== "player" ||
+      selectedColumn === null
+    )
+      return;
 
-    const newState = applyAction(gameState, 'player', action, selectedColumn);
+    const newState = applyAction(gameState, "player", action, selectedColumn);
     const nextState = switchTurn(newState);
     setGameState(nextState);
     setSelectedColumn(null); // Reset selection for next turn
   };
-  
+
   const handleColumnSelect = (columnIndex: number) => {
     setSelectedColumn(columnIndex);
   };
@@ -72,7 +98,10 @@ function App() {
       case ACTIONS.BOLSTER:
         return player.resources[RESOURCES.COIN] >= 1;
       case ACTIONS.BUILD:
-        return player.resources[RESOURCES.WOOD] >= 3 && player.resources[RESOURCES.COIN] >= 2;
+        return (
+          player.resources[RESOURCES.WOOD] >= 3 &&
+          player.resources[RESOURCES.COIN] >= 2
+        );
       default:
         return true;
     }
@@ -96,30 +125,31 @@ function App() {
           <div className="welcome-box">
             <h2>Welcome to Scythe!</h2>
             <p>
-              Play against an AI opponent in this strategic board game. 
-              Manage resources, expand your territory, and outmaneuver your opponent to victory!
+              Play against an AI opponent in this strategic board game. Manage
+              resources, expand your territory, and outmaneuver your opponent to
+              victory!
             </p>
-            
+
             <div className="difficulty-selection">
               <h3>Select AI Difficulty</h3>
               <div className="difficulty-buttons">
-                <button 
+                <button
                   className="difficulty-btn easy"
-                  onClick={() => startGame('easy')}
+                  onClick={() => startGame("easy")}
                 >
                   😊 Easy
                   <span className="difficulty-desc">Good for beginners</span>
                 </button>
-                <button 
+                <button
                   className="difficulty-btn medium"
-                  onClick={() => startGame('medium')}
+                  onClick={() => startGame("medium")}
                 >
                   🎯 Medium
                   <span className="difficulty-desc">Balanced challenge</span>
                 </button>
-                <button 
+                <button
                   className="difficulty-btn hard"
-                  onClick={() => startGame('hard')}
+                  onClick={() => startGame("hard")}
                 >
                   🔥 Hard
                   <span className="difficulty-desc">Expert level</span>
@@ -149,18 +179,21 @@ function App() {
         <h1>🎮 Scythe Board Game AI</h1>
         <div className="game-info">
           <span className="turn-indicator">
-            Turn {gameState.currentTurn} - {gameState.currentPlayer === 'player' ? '👤 Your Turn' : '🤖 AI Turn'}
+            Turn {gameState.currentTurn} -{" "}
+            {gameState.currentPlayer === "player"
+              ? "👤 Your Turn"
+              : "🤖 AI Turn"}
           </span>
           <span className="difficulty-badge">{difficulty.toUpperCase()}</span>
         </div>
       </header>
 
       <div className="game-controls">
-        <button 
+        <button
           className="control-btn"
           onClick={() => setShowRecommendations(!showRecommendations)}
         >
-          {showRecommendations ? '❌ Hide' : '💡 Show'} Recommendations
+          {showRecommendations ? "❌ Hide" : "💡 Show"} Recommendations
         </button>
         <button className="control-btn reset" onClick={resetGame}>
           🔄 New Game
@@ -186,35 +219,39 @@ function App() {
         <div className="left-column">
           <PlayerDashboard playerState={gameState.player} />
           <PlayerDashboard playerState={gameState.ai} isAI={true} />
-          
+
           <div className="score-panel">
             <div className="score-item player-score">
               <span>Your Score</span>
-              <span className="score-value">{calculateScore(gameState.player)}</span>
+              <span className="score-value">
+                {calculateScore(gameState.player)}
+              </span>
             </div>
             <div className="score-item ai-score">
               <span>AI Score</span>
-              <span className="score-value">{calculateScore(gameState.ai)}</span>
+              <span className="score-value">
+                {calculateScore(gameState.ai)}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="right-column">
-          <GameBoard 
-            board={gameState.board} 
+          <GameBoard
+            board={gameState.board}
             playerPosition={gameState.player.position}
             aiPosition={gameState.ai.position}
           />
-          
-          {gameState.currentPlayer === 'player' && (
+
+          {gameState.currentPlayer === "player" && (
             <>
-              <PlayerMat 
+              <PlayerMat
                 playerState={gameState.player}
                 onSelectColumn={handleColumnSelect}
                 availableColumns={getAvailableActionColumns(gameState.player)}
               />
               {selectedColumn !== null && (
-                <ActionPanel 
+                <ActionPanel
                   onAction={handlePlayerAction}
                   canAfford={canAfford}
                   recommendations={recommendations}
@@ -228,8 +265,8 @@ function App() {
               )}
             </>
           )}
-          
-          {gameState.currentPlayer === 'ai' && (
+
+          {gameState.currentPlayer === "ai" && (
             <div className="ai-thinking">
               <div className="thinking-animation">🤖 AI is thinking...</div>
             </div>
@@ -242,4 +279,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

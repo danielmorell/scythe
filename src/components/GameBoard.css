@@ -2,7 +2,9 @@
   background: linear-gradient(135deg, #4a3c2a 0%, #3a2f22 100%);
   border-radius: 4px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   margin-bottom: 20px;
   border: 2px solid #6b5642;
 }
@@ -258,42 +260,42 @@
   .hexagonal-board {
     height: 400px;
   }
-  
+
   .hex-territory {
     width: 60px;
     height: 69px;
   }
-  
+
   .hexagon {
     width: 60px;
     height: 35px;
     margin: 17px 0;
   }
-  
+
   .hexagon:before,
   .hexagon:after {
     width: 42.43px;
     height: 42.43px;
     left: 6.9118px;
   }
-  
+
   .hexagon:before {
     top: -21.2132px;
   }
-  
+
   .hexagon:after {
     bottom: -21.2132px;
   }
-  
+
   .hex-content {
     width: 45px;
     height: 45px;
   }
-  
+
   .territory-icon {
     font-size: 1.2rem;
   }
-  
+
   .board-legend {
     flex-direction: column;
     align-items: flex-start;

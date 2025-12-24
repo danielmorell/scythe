@@ -33,17 +33,20 @@ In Scythe, you compete against an AI opponent to accumulate the highest score by
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/danielmorell/scythe.git
 cd scythe
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -96,6 +99,7 @@ The AI uses an evaluation system that considers:
 - Distance to key locations (e.g., factory)
 
 The AI difficulty affects:
+
 - **Easy**: Makes somewhat random choices with simple evaluation
 - **Medium**: Balanced strategy with 2-step lookahead
 - **Hard**: Advanced strategy with 3-step lookahead and optimal decision-making

@@ -1,16 +1,21 @@
-import './PlayerDashboard.css';
-import { PlayerState } from '../game/gameState';
+import "./PlayerDashboard.css";
+import { PlayerState } from "../game/gameState";
 
 type PlayerDashboardProps = {
   playerState: PlayerState;
   isAI?: boolean;
 };
 
-export default function PlayerDashboard({ playerState, isAI = false }: PlayerDashboardProps) {
+export default function PlayerDashboard({
+  playerState,
+  isAI = false,
+}: PlayerDashboardProps) {
   return (
-    <div className={`player-dashboard ${isAI ? 'ai-dashboard' : 'player-dashboard'}`}>
+    <div
+      className={`player-dashboard ${isAI ? "ai-dashboard" : "player-dashboard"}`}
+    >
       <div className="dashboard-header">
-        <h3>{isAI ? '🤖 AI Opponent' : '👤 Player'}</h3>
+        <h3>{isAI ? "🤖 AI Opponent" : "👤 Player"}</h3>
         <div className="faction-name">{playerState.faction}</div>
       </div>
 
@@ -25,12 +30,16 @@ export default function PlayerDashboard({ playerState, isAI = false }: PlayerDas
           <div className="resource-item">
             <span className="resource-icon">⚡</span>
             <span className="resource-label">Power</span>
-            <span className="resource-value">{playerState.resources.power}</span>
+            <span className="resource-value">
+              {playerState.resources.power}
+            </span>
           </div>
           <div className="resource-item">
             <span className="resource-icon">❤️</span>
             <span className="resource-label">Popularity</span>
-            <span className="resource-value">{playerState.resources.popularity}</span>
+            <span className="resource-value">
+              {playerState.resources.popularity}
+            </span>
           </div>
           <div className="resource-item">
             <span className="resource-icon">🪵</span>
@@ -45,7 +54,9 @@ export default function PlayerDashboard({ playerState, isAI = false }: PlayerDas
           <div className="resource-item">
             <span className="resource-icon">⚙️</span>
             <span className="resource-label">Metal</span>
-            <span className="resource-value">{playerState.resources.metal}</span>
+            <span className="resource-value">
+              {playerState.resources.metal}
+            </span>
           </div>
           <div className="resource-item">
             <span className="resource-icon">🛢️</span>
@@ -69,7 +80,9 @@ export default function PlayerDashboard({ playerState, isAI = false }: PlayerDas
         <div className="stat-item">
           <span className="stat-icon">📍</span>
           <span className="stat-label">Position</span>
-          <span className="stat-value">({playerState.position.x}, {playerState.position.y})</span>
+          <span className="stat-value">
+            ({playerState.position.x}, {playerState.position.y})
+          </span>
         </div>
       </div>
     </div>
