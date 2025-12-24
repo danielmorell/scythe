@@ -8,6 +8,16 @@ export const FACTIONS = {
   RUSVIET: "Rusviet Union",
 } as const;
 
+export enum FactionTypes {
+  Albian = "albion",
+  Crimea = "crimea",
+  Nordic = "nordic",
+  Polania = "polania",
+  Rusviet = "rusviet",
+  Saxony = "saxony",
+  Togawa = "togawa",
+}
+
 // Faction abilities for water movement
 export const FACTION_ABILITIES = {
   NORDIC: { riverwalk: true, lakes: false }, // Can cross rivers
@@ -25,7 +35,19 @@ export const RESOURCES = {
   FOOD: "food",
   METAL: "metal",
   OIL: "oil",
+  COMBAT_CARD: "combat_card",
 } as const;
+
+export enum ResourceType {
+  Coin = "coin",
+  Power = "power",
+  Popularity = "popularity",
+  Wood = "wood",
+  Food = "food",
+  Metal = "metal",
+  Oil = "oil",
+  CombatCard = "combat_card",
+}
 
 export const ACTIONS = {
   MOVE: "move",
@@ -38,92 +60,1250 @@ export const ACTIONS = {
   DEPLOY: "deploy",
 } as const;
 
+export enum ActionType {
+  Move = "move",
+  Produce = "produce",
+  Trade = "trade",
+  Bolster = "bolster",
+  Build = "build",
+  Enlist = "enlist",
+  Upgrade = "upgrade",
+  Deploy = "deploy",
+}
+
 // Player mat action columns - each column has top and bottom actions
 export type PlayerMatColumn = {
-  topAction: ActionType;
-  bottomAction: ActionType;
+  topAction: Action;
+  bottomAction: Action;
+};
+
+export type Action = {
+  type: ActionType;
+  cost: Cost[];
+  benefitA: Benefit[];
+  benefitB?: Benefit[];
+};
+
+export type Cost = {
+  type: ResourceType;
+  upgradeable?: boolean;
+  workersEnlisted?: number;
+};
+
+export enum BenefitType {
+  Coin = "coin",
+  Power = "power",
+  Popularity = "popularity",
+  CombatCard = "combat_card",
+  WorkerResource = "worker_resource",
+  Resource = "resource",
+  Upgrade = "upgrade",
+  Enlistment = "enlistment",
+  Structure = "structure",
+  Mech = "mech",
+  Movement1Hex = "movement_1_hex",
+  Movement2Hex = "movement_2_hex",
+}
+
+export enum BenefitRequirement {
+  None = "none",
+  Upgrade = "upgrade",
+  Enlistment = "enlistment",
+  Monument = "monument",
+  Mill = "mill",
+  Armory = "armory",
+}
+
+export type Benefit = {
+  // Either resource types or the number of movement hexes a player can move a unit.
+  type: BenefitType;
+  requirements: BenefitRequirement;
+  onWorkerHex?: boolean;
+};
+
+export type PlayerMat = {
+  name: string;
+  number: string;
+  startingResources: ResourceType[];
+  actions: PlayerMatColumn[];
+};
+
+export const COMMON_PRODUCE: Action = {
+  type: ActionType.Produce,
+  cost: [
+    { type: ResourceType.Power, workersEnlisted: 2 },
+    { type: ResourceType.Popularity, workersEnlisted: 4 },
+    { type: ResourceType.Coin, workersEnlisted: 6 },
+  ],
+  benefitA: [
+    {
+      type: BenefitType.WorkerResource,
+      requirements: BenefitRequirement.None,
+      onWorkerHex: true,
+    },
+    {
+      type: BenefitType.WorkerResource,
+      requirements: BenefitRequirement.None,
+      onWorkerHex: true,
+    },
+    {
+      type: BenefitType.WorkerResource,
+      requirements: BenefitRequirement.Upgrade,
+      onWorkerHex: true,
+    },
+    { type: BenefitType.WorkerResource, requirements: BenefitRequirement.Mill },
+  ],
+};
+
+export const COMMON_TRADE: Action = {
+  type: ActionType.Trade,
+  cost: [{ type: ResourceType.Coin }],
+  benefitA: [
+    { type: BenefitType.Resource, requirements: BenefitRequirement.None },
+    { type: BenefitType.Resource, requirements: BenefitRequirement.None },
+    { type: BenefitType.Power, requirements: BenefitRequirement.Armory },
+  ],
+  benefitB: [
+    { type: BenefitType.Popularity, requirements: BenefitRequirement.None },
+    { type: BenefitType.Popularity, requirements: BenefitRequirement.Upgrade },
+    { type: BenefitType.Power, requirements: BenefitRequirement.Armory },
+  ],
+};
+
+export const COMMON_BOLSTER: Action = {
+  type: ActionType.Bolster,
+  cost: [{ type: ResourceType.Coin }],
+  benefitA: [
+    { type: BenefitType.Power, requirements: BenefitRequirement.None },
+    { type: BenefitType.Power, requirements: BenefitRequirement.None },
+    { type: BenefitType.Power, requirements: BenefitRequirement.Upgrade },
+    { type: BenefitType.Popularity, requirements: BenefitRequirement.Monument },
+  ],
+  benefitB: [
+    { type: BenefitType.CombatCard, requirements: BenefitRequirement.None },
+    { type: BenefitType.CombatCard, requirements: BenefitRequirement.Upgrade },
+    { type: BenefitType.Popularity, requirements: BenefitRequirement.Monument },
+  ],
+};
+
+export const COMMON_MOVE: Action = {
+  type: ActionType.Move,
+  cost: [],
+  benefitA: [
+    { type: BenefitType.Movement1Hex, requirements: BenefitRequirement.None },
+    { type: BenefitType.Movement1Hex, requirements: BenefitRequirement.None },
+    {
+      type: BenefitType.Movement1Hex,
+      requirements: BenefitRequirement.Upgrade,
+    },
+  ],
+  benefitB: [
+    { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+    { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+  ],
 };
 
 export const PLAYER_MAT_CONFIGURATIONS = {
-  INDUSTRIAL: [
-    {
-      topAction: ACTIONS.MOVE as ActionType,
-      bottomAction: ACTIONS.UPGRADE as ActionType,
-    },
-    {
-      topAction: ACTIONS.PRODUCE as ActionType,
-      bottomAction: ACTIONS.DEPLOY as ActionType,
-    },
-    {
-      topAction: ACTIONS.BOLSTER as ActionType,
-      bottomAction: ACTIONS.BUILD as ActionType,
-    },
-    {
-      topAction: ACTIONS.TRADE as ActionType,
-      bottomAction: ACTIONS.ENLIST as ActionType,
-    },
-  ],
-  ENGINEERING: [
-    {
-      topAction: ACTIONS.MOVE as ActionType,
-      bottomAction: ACTIONS.DEPLOY as ActionType,
-    },
-    {
-      topAction: ACTIONS.TRADE as ActionType,
-      bottomAction: ACTIONS.UPGRADE as ActionType,
-    },
-    {
-      topAction: ACTIONS.BOLSTER as ActionType,
-      bottomAction: ACTIONS.ENLIST as ActionType,
-    },
-    {
-      topAction: ACTIONS.PRODUCE as ActionType,
-      bottomAction: ACTIONS.BUILD as ActionType,
-    },
-  ],
-  PATRIOTIC: [
-    {
-      topAction: ACTIONS.MOVE as ActionType,
-      bottomAction: ACTIONS.BUILD as ActionType,
-    },
-    {
-      topAction: ACTIONS.BOLSTER as ActionType,
-      bottomAction: ACTIONS.UPGRADE as ActionType,
-    },
-    {
-      topAction: ACTIONS.PRODUCE as ActionType,
-      bottomAction: ACTIONS.ENLIST as ActionType,
-    },
-    {
-      topAction: ACTIONS.TRADE as ActionType,
-      bottomAction: ACTIONS.DEPLOY as ActionType,
-    },
-  ],
-  INNOVATIVE: [
-    {
-      topAction: ACTIONS.MOVE as ActionType,
-      bottomAction: ACTIONS.ENLIST as ActionType,
-    },
-    {
-      topAction: ACTIONS.TRADE as ActionType,
-      bottomAction: ACTIONS.BUILD as ActionType,
-    },
-    {
-      topAction: ACTIONS.PRODUCE as ActionType,
-      bottomAction: ACTIONS.UPGRADE as ActionType,
-    },
-    {
-      topAction: ACTIONS.BOLSTER as ActionType,
-      bottomAction: ACTIONS.DEPLOY as ActionType,
-    },
-  ],
+  INDUSTRIAL: {
+    name: "industrial",
+    number: "1",
+    startingResources: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    actions: [
+      {
+        topAction: COMMON_BOLSTER,
+        bottomAction: {
+          type: ActionType.Upgrade,
+          cost: [
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Upgrade,
+              requirements: BenefitRequirement.None,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Power,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_PRODUCE,
+        bottomAction: {
+          type: ActionType.Deploy,
+          cost: [
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal, upgradeable: true },
+            { type: ResourceType.Metal, upgradeable: true },
+          ],
+          benefitA: [
+            { type: BenefitType.Mech, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Coin,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_MOVE,
+        bottomAction: {
+          type: ActionType.Build,
+          cost: [
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Structure,
+              requirements: BenefitRequirement.None,
+              onWorkerHex: true,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Popularity,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_TRADE,
+        bottomAction: {
+          type: ActionType.Enlist,
+          cost: [
+            { type: ResourceType.Food },
+            { type: ResourceType.Food },
+            { type: ResourceType.Food, upgradeable: true },
+            { type: ResourceType.Food, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Enlistment,
+              requirements: BenefitRequirement.None,
+            },
+            {
+              type: BenefitType.CombatCard,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+    ],
+  } as PlayerMat,
+  ENGINEERING: {
+    name: "engineering",
+    number: "2",
+    startingResources: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    actions: [
+      {
+        topAction: COMMON_PRODUCE,
+        bottomAction: {
+          type: ActionType.Upgrade,
+          cost: [
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Upgrade,
+              requirements: BenefitRequirement.None,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Power,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_TRADE,
+        bottomAction: {
+          type: ActionType.Deploy,
+          cost: [
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal, upgradeable: true },
+            { type: ResourceType.Metal, upgradeable: true },
+          ],
+          benefitA: [
+            { type: BenefitType.Mech, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Coin,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_BOLSTER,
+        bottomAction: {
+          type: ActionType.Build,
+          cost: [
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood, upgradeable: true },
+            { type: ResourceType.Wood, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Structure,
+              requirements: BenefitRequirement.None,
+              onWorkerHex: true,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Popularity,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_MOVE,
+        bottomAction: {
+          type: ActionType.Enlist,
+          cost: [
+            { type: ResourceType.Food },
+            { type: ResourceType.Food },
+            { type: ResourceType.Food, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Enlistment,
+              requirements: BenefitRequirement.None,
+            },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.CombatCard,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+    ],
+  } as PlayerMat,
+
+  MILITANT: {
+    name: "militant",
+    number: "2a",
+    startingResources: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    actions: [
+      {
+        topAction: COMMON_BOLSTER,
+        bottomAction: {
+          type: ActionType.Upgrade,
+          cost: [
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil, upgradeable: true },
+            { type: ResourceType.Oil, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Upgrade,
+              requirements: BenefitRequirement.None,
+            },
+            {
+              type: BenefitType.Power,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_MOVE,
+        bottomAction: {
+          type: ActionType.Deploy,
+          cost: [
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal, upgradeable: true },
+          ],
+          benefitA: [
+            { type: BenefitType.Mech, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Coin,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_PRODUCE,
+        bottomAction: {
+          type: ActionType.Build,
+          cost: [
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Structure,
+              requirements: BenefitRequirement.None,
+              onWorkerHex: true,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Popularity,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_TRADE,
+        bottomAction: {
+          type: ActionType.Enlist,
+          cost: [
+            { type: ResourceType.Food },
+            { type: ResourceType.Food, upgradeable: true },
+            { type: ResourceType.Food, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Enlistment,
+              requirements: BenefitRequirement.None,
+            },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.CombatCard,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+    ],
+  } as PlayerMat,
+  PATRIOTIC: {
+    name: "patriotic",
+    number: "3",
+    startingResources: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    actions: [
+      {
+        topAction: COMMON_MOVE,
+        bottomAction: {
+          type: ActionType.Upgrade,
+          cost: [{ type: ResourceType.Oil }, { type: ResourceType.Oil }],
+          benefitA: [
+            {
+              type: BenefitType.Upgrade,
+              requirements: BenefitRequirement.None,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Power,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_BOLSTER,
+        bottomAction: {
+          type: ActionType.Deploy,
+          cost: [
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal, upgradeable: true },
+            { type: ResourceType.Metal, upgradeable: true },
+            { type: ResourceType.Metal, upgradeable: true },
+          ],
+          benefitA: [
+            { type: BenefitType.Mech, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Coin,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_TRADE,
+        bottomAction: {
+          type: ActionType.Build,
+          cost: [
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood, upgradeable: true },
+            { type: ResourceType.Wood, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Structure,
+              requirements: BenefitRequirement.None,
+              onWorkerHex: true,
+            },
+            {
+              type: BenefitType.Popularity,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_PRODUCE,
+        bottomAction: {
+          type: ActionType.Enlist,
+          cost: [
+            { type: ResourceType.Food },
+            { type: ResourceType.Food },
+            { type: ResourceType.Food, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Enlistment,
+              requirements: BenefitRequirement.None,
+            },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.CombatCard,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+    ],
+  } as PlayerMat,
+
+  INNOVATIVE: {
+    name: "innovative",
+    number: "3a",
+    startingResources: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    actions: [
+      {
+        topAction: COMMON_TRADE,
+        bottomAction: {
+          type: ActionType.Upgrade,
+          cost: [
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Upgrade,
+              requirements: BenefitRequirement.None,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Power,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_PRODUCE,
+        bottomAction: {
+          type: ActionType.Deploy,
+          cost: [
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal, upgradeable: true },
+          ],
+          benefitA: [
+            { type: BenefitType.Mech, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Coin,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_BOLSTER,
+        bottomAction: {
+          type: ActionType.Build,
+          cost: [
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood, upgradeable: true },
+            { type: ResourceType.Wood, upgradeable: true },
+            { type: ResourceType.Wood, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Structure,
+              requirements: BenefitRequirement.None,
+              onWorkerHex: true,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Popularity,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_MOVE,
+        bottomAction: {
+          type: ActionType.Enlist,
+          cost: [
+            { type: ResourceType.Food },
+            { type: ResourceType.Food, upgradeable: true },
+            { type: ResourceType.Food, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Enlistment,
+              requirements: BenefitRequirement.None,
+            },
+            {
+              type: BenefitType.CombatCard,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+    ],
+  } as PlayerMat,
+  MECHANICAL: {
+    name: "mechanical",
+    number: "4",
+    startingResources: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    actions: [
+      {
+        topAction: COMMON_TRADE,
+        bottomAction: {
+          type: ActionType.Upgrade,
+          cost: [
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil },
+            { type: ResourceType.Oil, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Upgrade,
+              requirements: BenefitRequirement.None,
+            },
+            {
+              type: BenefitType.Power,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_BOLSTER,
+        bottomAction: {
+          type: ActionType.Deploy,
+          cost: [
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal, upgradeable: true },
+            { type: ResourceType.Metal, upgradeable: true },
+          ],
+          benefitA: [
+            { type: BenefitType.Mech, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Coin,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_MOVE,
+        bottomAction: {
+          type: ActionType.Build,
+          cost: [
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Structure,
+              requirements: BenefitRequirement.None,
+              onWorkerHex: true,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Popularity,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_PRODUCE,
+        bottomAction: {
+          type: ActionType.Enlist,
+          cost: [
+            { type: ResourceType.Food },
+            { type: ResourceType.Food },
+            { type: ResourceType.Food, upgradeable: true },
+            { type: ResourceType.Food, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Enlistment,
+              requirements: BenefitRequirement.None,
+            },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.CombatCard,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+    ],
+  } as PlayerMat,
+  AGRICULTURAL: {
+    name: "agricultural",
+    number: "5",
+    startingResources: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    actions: [
+      {
+        topAction: COMMON_MOVE,
+        bottomAction: {
+          type: ActionType.Upgrade,
+          cost: [{ type: ResourceType.Oil }, { type: ResourceType.Oil }],
+          benefitA: [
+            {
+              type: BenefitType.Upgrade,
+              requirements: BenefitRequirement.None,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Power,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_TRADE,
+        bottomAction: {
+          type: ActionType.Deploy,
+          cost: [
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal },
+            { type: ResourceType.Metal, upgradeable: true },
+            { type: ResourceType.Metal, upgradeable: true },
+          ],
+          benefitA: [
+            { type: BenefitType.Mech, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Coin,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_PRODUCE,
+        bottomAction: {
+          type: ActionType.Build,
+          cost: [
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood },
+            { type: ResourceType.Wood, upgradeable: true },
+            { type: ResourceType.Wood, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Structure,
+              requirements: BenefitRequirement.None,
+              onWorkerHex: true,
+            },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            { type: BenefitType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.Popularity,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+      {
+        topAction: COMMON_BOLSTER,
+        bottomAction: {
+          type: ActionType.Enlist,
+          cost: [
+            { type: ResourceType.Food },
+            { type: ResourceType.Food, upgradeable: true },
+            { type: ResourceType.Food, upgradeable: true },
+          ],
+          benefitA: [
+            {
+              type: BenefitType.Enlistment,
+              requirements: BenefitRequirement.None,
+            },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            { type: ResourceType.Coin, requirements: BenefitRequirement.None },
+            {
+              type: BenefitType.CombatCard,
+              requirements: BenefitRequirement.Enlistment,
+            },
+          ],
+        },
+      },
+    ],
+  } as PlayerMat,
 } as const;
 
 export type PlayerMatType = keyof typeof PLAYER_MAT_CONFIGURATIONS;
 
+export type Ability = {
+  title: string;
+  description: string;
+};
+
+export type FactionMat = {
+  faction: FactionTypes;
+  startingResources: ResourceType[];
+  factionAbility: Ability;
+  mechAbilities: Ability[];
+  powerEnlistmentBonus: ResourceType[];
+  coinEnlistmentBonus: ResourceType[];
+  popularityEnlistmentBonus: ResourceType[];
+  combatCardEnlistmentBonus: ResourceType[];
+};
+
+export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
+  [FactionTypes.Albian]: {
+    faction: FactionTypes.Albian,
+    startingResources: [
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.Power,
+    ],
+    factionAbility: {
+      title: "Exalt",
+      description: "After moving your character, you may place a Flag token on its territory.",
+    },
+    mechAbilities: [
+      {
+        title: "Burrow",
+        description: "Move across rivers to or from adjacent tunnel territories.",
+      },
+      {
+        title: "Sword",
+        description: "Before combat where you are attacking, opponent gets -2 power",
+      },
+      {
+        title: "Shield",
+        description: "Before combat where you are defending, gain +2 power",
+      },
+      {
+        title: "Rally",
+        description: "Move to any territory where you have a worker or Flag token.",
+      }
+    ],
+    powerEnlistmentBonus: [
+      ResourceType.Power,
+      ResourceType.Power,
+    ],
+    coinEnlistmentBonus: [
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    popularityEnlistmentBonus: [
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+    ],
+    combatCardEnlistmentBonus: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+    ],
+  },
+  [FactionTypes.Crimea]: {
+    faction: FactionTypes.Crimea,
+    startingResources: [
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.Power,
+    ],
+    factionAbility: {
+      title: "Coercion",
+      description: "Once per you may spend 1 combat card as if it were any 1 resource token.",
+    },
+    mechAbilities: [
+      {
+        title: "Riverwalk",
+        description: "Move across rivers to farms and tundra.",
+      },
+      {
+        title: "Wayfare",
+        description: "Move from a territory or home base to any inactive faction's home base or your own.",
+      },
+      {
+        title: "Scout",
+        description: "Before combat steal 1 of the opponent's combat cards at random.",
+      },
+      {
+        title: "Speed",
+        description: "+1 hex per movement.",
+      },
+    ],
+    powerEnlistmentBonus: [
+        ResourceType.Power,
+        ResourceType.Power,
+    ],
+    coinEnlistmentBonus: [
+        ResourceType.Coin,
+        ResourceType.Coin,
+    ],
+    popularityEnlistmentBonus: [
+        ResourceType.Popularity,
+        ResourceType.Popularity,
+    ],
+    combatCardEnlistmentBonus: [
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+    ],
+  },
+  [FactionTypes.Nordic]: {
+    faction: FactionTypes.Nordic,
+    startingResources: [
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.CombatCard,
+    ],
+    factionAbility: {
+      title: "Swim",
+      description: "Your workers may move across rivers.",
+    },
+    mechAbilities: [
+      {
+        title: "Riverwalk",
+        description: "Move across rivers to forests and mountains.",
+      },
+      {
+        title: "Seaworthy",
+        description: "Move to/from lakes and retreat onto adjacent lakes.",
+      },
+      {
+        title: "Artillery",
+        description: "Before combat, if you pay 1 power, opponent gets -2 power.",
+      },
+      {
+        title: "Speed",
+        description: "+1 hex per movement.",
+      },
+    ],
+    powerEnlistmentBonus: [
+      ResourceType.Power,
+      ResourceType.Power,
+    ],
+    coinEnlistmentBonus: [
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    popularityEnlistmentBonus: [
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+    ],
+    combatCardEnlistmentBonus: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+    ],
+  },
+  [FactionTypes.Polania]: {
+    faction: FactionTypes.Polania,
+    startingResources: [
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+    ],
+    factionAbility: {
+      title: "Meander",
+      description: "Pick up to 2 options per encounter card.",
+    },
+    mechAbilities: [
+      {
+        title: "Riverwalk",
+        description: "Move across rivers to villages and mountains.",
+      },
+      {
+        title: "Submerge",
+        description: "Move to/from lakes and move from any lake to another.",
+      },
+      {
+        title: "Camaraderie",
+        description: "In combat, do not loose popularity when forcing an opponent's worker(s) to retreat.",
+      },
+      {
+        title: "Speed",
+        description: "+1 hex per movement.",
+      },
+    ],
+    powerEnlistmentBonus: [
+      ResourceType.Power,
+      ResourceType.Power,
+    ],
+    coinEnlistmentBonus: [
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    popularityEnlistmentBonus: [
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+    ],
+    combatCardEnlistmentBonus: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+    ],
+  },
+  [FactionTypes.Rusviet]: {
+    faction: FactionTypes.Rusviet,
+    startingResources: [
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.Power,
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+    ],
+    factionAbility: {
+      title: "Relentless",
+      description: "You may choose the same section on your Player Mat as the previous turn(s).",
+    },
+    mechAbilities: [
+      {
+        title: "Riverwalk",
+        description: "Move across rivers to farms and villages.",
+      },
+      {
+        title: "Township",
+        description: "Move between any village you control and the Factory.",
+      },
+      {
+        title: "People's Army",
+        description: "In combat where you have at least 1 worker, you may play +1 combat card.",
+      },
+      {
+        title: "Speed",
+        description: "+1 hex per movement.",
+      },
+    ],
+    powerEnlistmentBonus: [
+      ResourceType.Power,
+      ResourceType.Power,
+    ],
+    coinEnlistmentBonus: [
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    popularityEnlistmentBonus: [
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+    ],
+    combatCardEnlistmentBonus: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+    ],
+  },
+  [FactionTypes.Saxony]: {
+    faction: FactionTypes.Saxony,
+    startingResources: [
+        ResourceType.Power,
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+    ],
+    factionAbility: {
+      title: "Dominate",
+      description: "There is no limit to the number of stars you can place from completing objectives and winning combat.",
+    },
+    mechAbilities: [
+      {
+        title: "Riverwalk",
+        description: "Move across rivers to forests and mountains.",
+      },
+      {
+        title: "Underpass",
+        description: "Move between any mountain you control and any tunnel.",
+      },
+      {
+        title: "Disarm",
+        description: "Before combat on a territory with a tunnel, opponent gets -2 power.",
+      },
+      {
+        title: "Speed",
+        description: "+1 hex per movement.",
+      },
+    ],
+    powerEnlistmentBonus: [
+      ResourceType.Power,
+      ResourceType.Power,
+    ],
+    coinEnlistmentBonus: [
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    popularityEnlistmentBonus: [
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+    ],
+    combatCardEnlistmentBonus: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+    ],
+  },
+  [FactionTypes.Togawa]: {
+    faction: FactionTypes.Togawa,
+    startingResources: [
+        ResourceType.CombatCard,
+        ResourceType.CombatCard,
+    ],
+    factionAbility: {
+      title: "Maikufu",
+      description: "After moving your character, you may place an armed Trap token on its territory.",
+    },
+    mechAbilities: [
+      {
+        title: "Toka",
+        description: "Move across a river (max 1 character or 1 mech per tern)",
+      },
+      {
+        title: "Suiton",
+        description: "Move to/from lakes: in combat on a lake, you may play +1 combat card",
+      },
+      {
+        title: "Ronin",
+        description: "Before combat where you have exactly 1 unit, gain +2 power",
+      },
+      {
+        title: "Shiobi",
+        description: "Move to any territory where you have a Trap token; you may arm the Trap",
+      },
+    ],
+    powerEnlistmentBonus: [
+      ResourceType.Power,
+      ResourceType.Power,
+    ],
+    coinEnlistmentBonus: [
+      ResourceType.Coin,
+      ResourceType.Coin,
+    ],
+    popularityEnlistmentBonus: [
+      ResourceType.Popularity,
+      ResourceType.Popularity,
+    ],
+    combatCardEnlistmentBonus: [
+      ResourceType.CombatCard,
+      ResourceType.CombatCard,
+    ],
+  },
+};
+
 export type Faction = (typeof FACTIONS)[keyof typeof FACTIONS];
-export type ResourceType = (typeof RESOURCES)[keyof typeof RESOURCES];
-export type ActionType = (typeof ACTIONS)[keyof typeof ACTIONS];
 
 export type Position = {
   x: number;
