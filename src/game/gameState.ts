@@ -960,6 +960,7 @@ export type Ability = {
 
 export type FactionMat = {
   faction: FactionTypes;
+  name: string;
   startingResources: ResourceType[];
   factionAbility: Ability;
   mechAbilities: Ability[];
@@ -972,6 +973,7 @@ export type FactionMat = {
 export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   [FactionTypes.Albian]: {
     faction: FactionTypes.Albian,
+    name: "Clan Albian",
     startingResources: [
         ResourceType.Power,
         ResourceType.Power,
@@ -1018,6 +1020,7 @@ export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   },
   [FactionTypes.Crimea]: {
     faction: FactionTypes.Crimea,
+    name: "Crimean Khanate",
     startingResources: [
         ResourceType.Power,
         ResourceType.Power,
@@ -1066,6 +1069,7 @@ export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   },
   [FactionTypes.Nordic]: {
     faction: FactionTypes.Nordic,
+    name: "Nordic Kingdoms",
     startingResources: [
         ResourceType.Power,
         ResourceType.Power,
@@ -1114,6 +1118,7 @@ export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   },
   [FactionTypes.Polania]: {
     faction: FactionTypes.Polania,
+    name: "Republic of Polania",
     startingResources: [
         ResourceType.Power,
         ResourceType.Power,
@@ -1162,6 +1167,7 @@ export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   },
   [FactionTypes.Rusviet]: {
     faction: FactionTypes.Rusviet,
+    name: "Rusviet Union",
     startingResources: [
         ResourceType.Power,
         ResourceType.Power,
@@ -1210,6 +1216,7 @@ export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   },
   [FactionTypes.Saxony]: {
     faction: FactionTypes.Saxony,
+    name: "Saxony Empire",
     startingResources: [
         ResourceType.Power,
         ResourceType.CombatCard,
@@ -1258,6 +1265,7 @@ export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   },
   [FactionTypes.Togawa]: {
     faction: FactionTypes.Togawa,
+    name: "Togawa Shogunate",
     startingResources: [
         ResourceType.CombatCard,
         ResourceType.CombatCard,
