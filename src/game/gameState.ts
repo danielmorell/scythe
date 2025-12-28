@@ -1383,6 +1383,21 @@ export type Territory = {
   rivers: RiverEdge[]; // Rivers on the edges of this territory
 };
 
+/**
+ * RiverEdge represents a river on one edge of a hexagonal territory.
+ *
+ * The direction is represented as an integer from 0 to 5, corresponding to the six edges of a hex:
+ * 0 = East
+ * 1 = Northeast
+ * 2 = Northwest
+ * 3 = West
+ * 4 = Southwest
+ * 5 = Southeast
+ *
+ *     2 /\ 1
+ *    3 | | 0
+ *    4 \/ 5
+ */
 export type RiverEdge = {
   direction: number; // 0-5 for the 6 hex edges (0=E, 1=NE, 2=NW, 3=W, 4=SW, 5=SE)
 };
@@ -1567,6 +1582,13 @@ function generateTerritories(): Territory[] {
   return territories;
 }
 
+/**
+ * Determine rivers for a given hex based on its axial coordinates.
+ *
+ * @param q The q axial coordinate
+ * @param r The r axial coordinate
+ * @returns An array of RiverEdge objects representing rivers on the hex edges.
+ */
 function getRivers(q: number, r: number): RiverEdge[] {
   const rivers: RiverEdge[] = [];
   const distance = Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r));
