@@ -1,0 +1,304 @@
+.game-board {
+  background: linear-gradient(135deg, #4a3c2a 0%, #3a2f22 100%);
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  border: 2px solid #6b5642;
+}
+
+.game-board h3 {
+  margin: 0 0 15px 0;
+  color: #d4a574;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.hexagonal-board {
+  position: relative;
+  width: 100%;
+  height: 700px;
+  background: linear-gradient(135deg, #3a2f22 0%, #2c2416 100%);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 2px solid #6b5642;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hex-territory {
+  position: absolute;
+  width: 80px;
+  height: 92px;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hex-territory:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  z-index: 10;
+}
+
+.hexagon {
+  position: relative;
+  width: 80px;
+  height: 46px;
+  background-color: #6b5a3a;
+  margin: 23px 0;
+  border-left: 2px solid #4a3c2a;
+  border-right: 2px solid #4a3c2a;
+}
+
+.hexagon:before,
+.hexagon:after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  width: 56.57px;
+  height: 56.57px;
+  transform: scaleY(0.5774) rotate(-45deg);
+  background-color: inherit;
+  left: 9.2157px;
+  border-left: 2px solid #4a3c2a;
+  border-right: 2px solid #4a3c2a;
+}
+
+.hexagon:before {
+  top: -28.2843px;
+  border-top: 2px solid #4a3c2a;
+  border-bottom: none;
+}
+
+.hexagon:after {
+  bottom: -28.2843px;
+  border-bottom: 2px solid #4a3c2a;
+  border-top: none;
+}
+
+.hex-territory.factory .hexagon {
+  background-color: #b8860b;
+}
+
+.hex-territory.factory .hexagon:before,
+.hex-territory.factory .hexagon:after {
+  border-color: #704214;
+}
+
+.hex-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  text-align: center;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Water tiles styling */
+.hex-territory .hexagon[data-type="lake"],
+.hex-territory .hexagon[data-type="river"] {
+  background-color: #b3e5fc;
+}
+
+.hex-territory .hexagon[data-type="lake"]:before,
+.hex-territory .hexagon[data-type="lake"]:after,
+.hex-territory .hexagon[data-type="river"]:before,
+.hex-territory .hexagon[data-type="river"]:after {
+  background-color: #b3e5fc;
+  border-color: #03a9f4;
+}
+
+/* Lake territory styling */
+.hex-territory:has(.territory-icon:contains("🌊")) .hexagon {
+  background-color: #b3e5fc;
+}
+
+.hex-territory:has(.territory-icon:contains("🌊")) .hexagon:before,
+.hex-territory:has(.territory-icon:contains("🌊")) .hexagon:after {
+  background-color: #b3e5fc;
+  border-color: #03a9f4;
+}
+
+/* River edges */
+.river-edge {
+  position: absolute;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #03a9f4, transparent);
+  z-index: 3;
+  transform-origin: center;
+}
+
+/* Position rivers on each of the 6 hex edges */
+.river-direction-0 {
+  /* East */
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.river-direction-1 {
+  /* Northeast */
+  right: -10px;
+  top: 15%;
+  transform: translate(0, -50%) rotate(-60deg);
+}
+
+.river-direction-2 {
+  /* Northwest */
+  left: -10px;
+  top: 15%;
+  transform: translate(0, -50%) rotate(60deg);
+}
+
+.river-direction-3 {
+  /* West */
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.river-direction-4 {
+  /* Southwest */
+  left: -10px;
+  bottom: 15%;
+  transform: translate(0, 50%) rotate(-60deg);
+}
+
+.river-direction-5 {
+  /* Southeast */
+  right: -10px;
+  bottom: 15%;
+  transform: translate(0, 50%) rotate(60deg);
+}
+
+.hex-territory.player-position .hexagon {
+  background-color: #5a4a3a;
+}
+
+.hex-territory.player-position .hexagon:before,
+.hex-territory.player-position .hexagon:after {
+  border-color: #8b7355;
+  border-width: 3px;
+}
+
+.hex-territory.player-position .hexagon {
+  border-color: #8b7355;
+  border-width: 3px;
+}
+
+.hex-territory.ai-position .hexagon {
+  background-color: #6b3410;
+}
+
+.hex-territory.ai-position .hexagon:before,
+.hex-territory.ai-position .hexagon:after {
+  border-color: #8b4513;
+  border-width: 3px;
+}
+
+.hex-territory.ai-position .hexagon {
+  border-color: #8b4513;
+  border-width: 3px;
+}
+
+.territory-icon {
+  font-size: 1.5rem;
+}
+
+.unit-marker {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 3;
+}
+
+.player-marker {
+  border: 2px solid #8b7355;
+}
+
+.ai-marker {
+  border: 2px solid #8b4513;
+}
+
+.board-legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #6b5642;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #c9b896;
+}
+
+.legend-icon {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .hexagonal-board {
+    height: 400px;
+  }
+
+  .hex-territory {
+    width: 60px;
+    height: 69px;
+  }
+
+  .hexagon {
+    width: 60px;
+    height: 35px;
+    margin: 17px 0;
+  }
+
+  .hexagon:before,
+  .hexagon:after {
+    width: 42.43px;
+    height: 42.43px;
+    left: 6.9118px;
+  }
+
+  .hexagon:before {
+    top: -21.2132px;
+  }
+
+  .hexagon:after {
+    bottom: -21.2132px;
+  }
+
+  .hex-content {
+    width: 45px;
+    height: 45px;
+  }
+
+  .territory-icon {
+    font-size: 1.2rem;
+  }
+
+  .board-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
