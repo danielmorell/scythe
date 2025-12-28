@@ -1,13 +1,5 @@
 // Scythe Game State Management
 
-export const FACTIONS = {
-  NORDIC: "Nordic Kingdom",
-  CRIMEA: "Crimean Khanate",
-  SAXONY: "Saxony Empire",
-  POLANIA: "Republic of Polania",
-  RUSVIET: "Rusviet Union",
-} as const;
-
 export enum FactionTypes {
   Albian = "albion",
   Crimea = "crimea",
@@ -20,11 +12,13 @@ export enum FactionTypes {
 
 // Faction abilities for water movement
 export const FACTION_ABILITIES = {
-  NORDIC: { riverwalk: true, lakes: false }, // Can cross rivers
+  ALBION: { riverwalk: false, lakes: false }, // No water abilities (uses tunnels)
   CRIMEA: { riverwalk: false, lakes: false }, // No water abilities
-  SAXONY: { riverwalk: false, lakes: false }, // No water abilities
-  POLANIA: { riverwalk: false, lakes: true }, // Can cross lakes
+  NORDIC: { riverwalk: true, lakes: true }, // Can cross rivers and lakes (Seaworthy)
+  POLANIA: { riverwalk: false, lakes: true }, // Can cross lakes (Submerge)
   RUSVIET: { riverwalk: true, lakes: false }, // Can cross rivers
+  SAXONY: { riverwalk: false, lakes: false }, // No water abilities (uses tunnels)
+  TOGAWA: { riverwalk: false, lakes: true }, // Can cross lakes (Suiton)
 } as const;
 
 export const RESOURCES = {
@@ -1311,6 +1305,17 @@ export const FACTION_MATS: { [key in FactionTypes]: FactionMat } = {
   },
 };
 
+// Derive FACTIONS from FACTION_MATS names
+export const FACTIONS = {
+  ALBION: FACTION_MATS[FactionTypes.Albian].name,
+  CRIMEA: FACTION_MATS[FactionTypes.Crimea].name,
+  NORDIC: FACTION_MATS[FactionTypes.Nordic].name,
+  POLANIA: FACTION_MATS[FactionTypes.Polania].name,
+  RUSVIET: FACTION_MATS[FactionTypes.Rusviet].name,
+  SAXONY: FACTION_MATS[FactionTypes.Saxony].name,
+  TOGAWA: FACTION_MATS[FactionTypes.Togawa].name,
+} as const;
+
 export type Faction = (typeof FACTIONS)[keyof typeof FACTIONS];
 
 export type Position = {
@@ -1429,19 +1434,23 @@ export function createInitialGameState(
   };
 }
 
-// Helper function to map old faction names to new FactionTypes
+// Helper function to map faction names to FactionTypes
 function getFactionType(faction: Faction): FactionTypes {
   switch (faction) {
-    case FACTIONS.NORDIC:
-      return FactionTypes.Nordic;
+    case FACTIONS.ALBION:
+      return FactionTypes.Albian;
     case FACTIONS.CRIMEA:
       return FactionTypes.Crimea;
-    case FACTIONS.SAXONY:
-      return FactionTypes.Saxony;
+    case FACTIONS.NORDIC:
+      return FactionTypes.Nordic;
     case FACTIONS.POLANIA:
       return FactionTypes.Polania;
     case FACTIONS.RUSVIET:
       return FactionTypes.Rusviet;
+    case FACTIONS.SAXONY:
+      return FactionTypes.Saxony;
+    case FACTIONS.TOGAWA:
+      return FactionTypes.Togawa;
     default:
       return FactionTypes.Polania;
   }
@@ -1455,20 +1464,26 @@ function createPlayerState(
   // Get faction abilities based on faction
   let abilities: FactionAbilities;
   switch (faction) {
-    case FACTIONS.NORDIC:
-      abilities = FACTION_ABILITIES.NORDIC;
+    case FACTIONS.ALBION:
+      abilities = FACTION_ABILITIES.ALBION;
       break;
     case FACTIONS.CRIMEA:
       abilities = FACTION_ABILITIES.CRIMEA;
       break;
-    case FACTIONS.SAXONY:
-      abilities = FACTION_ABILITIES.SAXONY;
+    case FACTIONS.NORDIC:
+      abilities = FACTION_ABILITIES.NORDIC;
       break;
     case FACTIONS.POLANIA:
       abilities = FACTION_ABILITIES.POLANIA;
       break;
     case FACTIONS.RUSVIET:
       abilities = FACTION_ABILITIES.RUSVIET;
+      break;
+    case FACTIONS.SAXONY:
+      abilities = FACTION_ABILITIES.SAXONY;
+      break;
+    case FACTIONS.TOGAWA:
+      abilities = FACTION_ABILITIES.TOGAWA;
       break;
     default:
       abilities = { riverwalk: false, lakes: false };
